@@ -108,7 +108,7 @@ export default function Layout({ children, title }: LayoutProps) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto text-[#000000]">
           {navItems.map((item) => (
             <NavLink key={item.href} item={item} />
           ))}
