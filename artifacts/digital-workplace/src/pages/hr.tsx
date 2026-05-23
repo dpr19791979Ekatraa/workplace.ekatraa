@@ -24,6 +24,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Check, X, Clock, Plus, Megaphone, Trash2 } from "lucide-react";
+import PayslipsTab from "@/components/payslips-tab";
 
 const leaveStatusColors: Record<string, string> = {
   pending: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
@@ -321,8 +322,13 @@ export default function HRPage() {
           <TabsList>
             <TabsTrigger value="employees" data-testid="tab-employees">Employees</TabsTrigger>
             <TabsTrigger value="leaves" data-testid="tab-leaves">Leave Requests</TabsTrigger>
+            <TabsTrigger value="payslips" data-testid="tab-payslips">Payslips</TabsTrigger>
             <TabsTrigger value="announcements" data-testid="tab-announcements">Announcements</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="payslips" className="mt-4">
+            <PayslipsTab user={currentUser as any} />
+          </TabsContent>
 
           {/* Employees tab */}
           <TabsContent value="employees" className="mt-4 space-y-3">
