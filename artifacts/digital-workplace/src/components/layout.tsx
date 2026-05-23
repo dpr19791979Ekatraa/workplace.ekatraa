@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   LayoutDashboard, FolderKanban, CheckSquare, FileText, Users,
-  BarChart2, Settings, LogOut, Sun, Moon, Menu, X, Shield,
+  BarChart2, Settings, LogOut, Sun, Moon, Menu, X, Shield, BookOpen,
 } from "lucide-react";
 
 const navItems = [
@@ -20,6 +20,7 @@ const navItems = [
   { href: "/documents", icon: FileText, label: "Documents" },
   { href: "/hr", icon: Users, label: "HR" },
   { href: "/analytics", icon: BarChart2, label: "Analytics" },
+  { href: "/policy", icon: BookOpen, label: "Policy" },
 ];
 
 const adminNavItems = [
