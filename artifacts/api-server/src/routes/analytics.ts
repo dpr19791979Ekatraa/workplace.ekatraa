@@ -141,6 +141,79 @@ router.get("/analytics/activity", requireAuth, async (req, res): Promise<void> =
   res.json(formatted);
 });
 
+router.get("/analytics/team-performance", requireAuth, async (req, res): Promise<void> => {
+  const currentUser = (req as any).currentUser;
+  if (!["super_admin", "admin"].includes(currentUser.role)) {
+    res.status(403).json({ error: "Forbidden" });
+    return;
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const rows = await db.select({
+    userId: usersTable.id,
+    firstName: usersTable.firstName,
+    lastName: usersTable.lastName,
+    avatarUrl: usersTable.avatarUrl,
+    role: usersTable.role,
+    jobTitle: usersTable.jobTitle,
+    departmentId: usersTable.departmentId,
+    status: usersTable.status,
+  }).from(usersTable).where(eq(usersTable.status, "active")).orderBy(usersTable.firstName);
+
+  const perf = await Promise.all(rows.map(async u => {
+    const [{ total }] = await db.select({ total: sql<number>`count(*)::int` })
+      .from(tasksTable).where(eq(tasksTable.assigneeId, u.userId));
+    const [{ done }] = await db.select({ done: sql<number>`count(*)::int` })
+      .from(tasksTable)
+      .where(and(eq(tasksTable.assigneeId, u.userId), eq(tasksTable.status, "done"))!);
+    const [{ inProgress }] = await db.select({ inProgress: sql<number>`count(*)::int` })
+      .from(tasksTable)
+      .where(and(eq(tasksTable.assigneeId, u.userId), eq(tasksTable.status, "in_progress"))!);
+    const [{ todo }] = await db.select({ todo: sql<number>`count(*)::int` })
+      .from(tasksTable)
+      .where(and(eq(tasksTable.assigneeId, u.userId), eq(tasksTable.status, "todo"))!);
+    const [{ overdue }] = await db.select({ overdue: sql<number>`count(*)::int` })
+      .from(tasksTable)
+      .where(and(
+        eq(tasksTable.assigneeId, u.userId),
+        sql`${tasksTable.status} != 'done'`,
+        sql`${tasksTable.dueDate} is not null`,
+        sql`${tasksTable.dueDate} < ${today}`,
+      )!);
+    const [{ projects }] = await db.select({ projects: sql<number>`count(*)::int` })
+      .from(projectsTable).where(eq(projectsTable.ownerId, u.userId));
+
+    let departmentName: string | null = null;
+    if (u.departmentId) {
+      const [d] = await db.select({ name: departmentsTable.name })
+        .from(departmentsTable).where(eq(departmentsTable.id, u.departmentId)).limit(1);
+      if (d) departmentName = d.name;
+    }
+
+    const completionRate = total > 0 ? Math.round((done / total) * 100) : 0;
+
+    return {
+      userId: u.userId,
+      name: `${u.firstName} ${u.lastName}`.trim(),
+      avatarUrl: u.avatarUrl,
+      role: u.role,
+      jobTitle: u.jobTitle,
+      departmentName,
+      totalTasks: total,
+      doneTasks: done,
+      inProgressTasks: inProgress,
+      todoTasks: todo,
+      overdueTasks: overdue,
+      ownedProjects: projects,
+      completionRate,
+    };
+  }));
+
+  perf.sort((a, b) => b.completionRate - a.completionRate || b.doneTasks - a.doneTasks);
+  res.json(perf);
+});
+
 router.get("/analytics/productivity", requireAuth, async (req, res): Promise<void> => {
   const parsed = GetProductivityAnalyticsQueryParams.safeParse(req.query);
   if (!parsed.success) {

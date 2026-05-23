@@ -8,7 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import {
   useGetDashboardAnalytics, useGetProductivityAnalytics, useGetCurrentUser,
   getGetDashboardAnalyticsQueryKey, getGetProductivityAnalyticsQueryKey,
+  customFetch,
 } from "@workspace/api-client-react";
+import { useQuery } from "@tanstack/react-query";
+import { Progress } from "@/components/ui/progress";
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis,
   Tooltip, ResponsiveContainer, CartesianGrid, Legend,
@@ -21,6 +24,13 @@ export default function AnalyticsPage() {
 
   const { data: currentUser } = useGetCurrentUser();
   const isManager = currentUser?.role && ["super_admin", "admin", "hr_manager", "manager", "team_leader"].includes(currentUser.role);
+  const isAdmin = currentUser?.role && ["super_admin", "admin"].includes(currentUser.role);
+
+  const { data: teamPerf, isLoading: teamLoading } = useQuery({
+    queryKey: ["analytics", "team-performance"],
+    queryFn: () => customFetch<any[]>("/api/analytics/team-performance"),
+    enabled: !!isAdmin,
+  });
 
   const { data: dashboard, isLoading: dashLoading } = useGetDashboardAnalytics({
     query: { queryKey: getGetDashboardAnalyticsQueryKey() }
@@ -226,6 +236,84 @@ export default function AnalyticsPage() {
           </Card>
           )}
         </div>
+
+        {/* Team performance — admins only */}
+        {isAdmin && (
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-semibold">Team Performance</CardTitle>
+                <span className="text-xs text-muted-foreground">
+                  {teamPerf?.length ?? 0} employees
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              {teamLoading ? (
+                <div className="p-5 space-y-2">
+                  {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-14 w-full" />)}
+                </div>
+              ) : !teamPerf || teamPerf.length === 0 ? (
+                <p className="p-6 text-center text-sm text-muted-foreground">No employees yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+                      <tr>
+                        <th className="text-left px-5 py-3 font-medium">Employee</th>
+                        <th className="text-left px-3 py-3 font-medium">Department</th>
+                        <th className="text-center px-3 py-3 font-medium">Total</th>
+                        <th className="text-center px-3 py-3 font-medium">Done</th>
+                        <th className="text-center px-3 py-3 font-medium">In Progress</th>
+                        <th className="text-center px-3 py-3 font-medium">Overdue</th>
+                        <th className="text-center px-3 py-3 font-medium">Projects</th>
+                        <th className="text-left px-5 py-3 font-medium w-56">Completion</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {teamPerf.map((p: any) => (
+                        <tr key={p.userId} className="hover:bg-muted/30" data-testid={`row-perf-${p.userId}`}>
+                          <td className="px-5 py-3">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-8 h-8">
+                                <AvatarImage src={p.avatarUrl} />
+                                <AvatarFallback className="text-[11px] bg-primary/10 text-primary">
+                                  {p.name?.split(" ").map((s: string) => s[0]).slice(0, 2).join("")}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0">
+                                <p className="font-medium truncate">{p.name}</p>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {p.jobTitle ?? p.role?.replace(/_/g, " ")}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-3 py-3 text-muted-foreground">{p.departmentName ?? "—"}</td>
+                          <td className="px-3 py-3 text-center tabular-nums">{p.totalTasks}</td>
+                          <td className="px-3 py-3 text-center tabular-nums font-medium text-emerald-600">{p.doneTasks}</td>
+                          <td className="px-3 py-3 text-center tabular-nums">{p.inProgressTasks}</td>
+                          <td className="px-3 py-3 text-center tabular-nums">
+                            {p.overdueTasks > 0
+                              ? <span className="text-red-600 font-medium">{p.overdueTasks}</span>
+                              : <span className="text-muted-foreground">0</span>}
+                          </td>
+                          <td className="px-3 py-3 text-center tabular-nums">{p.ownedProjects}</td>
+                          <td className="px-5 py-3">
+                            <div className="flex items-center gap-2">
+                              <Progress value={p.completionRate} className="h-2 flex-1" />
+                              <span className="text-xs font-medium w-10 text-right tabular-nums">{p.completionRate}%</span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </Layout>
   );

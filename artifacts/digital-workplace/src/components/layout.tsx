@@ -96,7 +96,7 @@ export default function Layout({ children, title }: LayoutProps) {
         `}
       >
         {/* Logo */}
-        <div className="flex gap-2.5 px-4 py-5 border-b border-sidebar-border text-[#000000] justify-center items-center border-t-[#332924] border-r-[#332924] border-b-[#332924] border-l-[#332924]">
+        <div className="flex gap-2.5 px-4 py-5 border-b border-sidebar-border text-[#000000] justify-center items-center border-t-[#000000] border-r-[#000000] border-b-[#000000] border-l-[#000000]">
           <img src="/logo.png" className="h-24 w-auto" alt="ekatraa" />
           <Button
             variant="ghost"
@@ -125,7 +125,7 @@ export default function Layout({ children, title }: LayoutProps) {
         </nav>
 
         {/* User */}
-        <div className="p-3 border-t border-sidebar-border border-t-[#332924] border-r-[#332924] border-b-[#332924] border-l-[#332924]">
+        <div className="p-3 border-t border-sidebar-border border-t-[#000000] border-r-[#000000] border-b-[#000000] border-l-[#000000]">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
