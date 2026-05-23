@@ -1078,6 +1078,8 @@ export const ListMeetingsResponseItem = zod.object({
   "scheduledAt": zod.coerce.date(),
   "durationMinutes": zod.number(),
   "status": zod.enum(['scheduled', 'live', 'ended', 'cancelled']),
+  "kind": zod.enum(['one_on_one', 'group']),
+  "participantIds": zod.array(zod.number()),
   "joinUrl": zod.string().optional(),
   "createdAt": zod.coerce.date()
 })
@@ -1092,13 +1094,18 @@ export const createMeetingBodyDurationMinutesDefault = 30;
 export const createMeetingBodyDurationMinutesMin = 5;
 export const createMeetingBodyDurationMinutesMax = 480;
 
-
+export const createMeetingBodyKindDefault = `group`;
+export const createMeetingBodyParticipantIdsDefault = [];
+export const createMeetingBodyNotifyEveryoneDefault = false;
 
 export const CreateMeetingBody = zod.object({
   "title": zod.string().min(1),
   "description": zod.string().nullish(),
   "scheduledAt": zod.coerce.date(),
-  "durationMinutes": zod.number().min(createMeetingBodyDurationMinutesMin).max(createMeetingBodyDurationMinutesMax).default(createMeetingBodyDurationMinutesDefault)
+  "durationMinutes": zod.number().min(createMeetingBodyDurationMinutesMin).max(createMeetingBodyDurationMinutesMax).default(createMeetingBodyDurationMinutesDefault),
+  "kind": zod.enum(['one_on_one', 'group']).default(createMeetingBodyKindDefault),
+  "participantIds": zod.array(zod.number()).default(createMeetingBodyParticipantIdsDefault),
+  "notifyEveryone": zod.boolean().default(createMeetingBodyNotifyEveryoneDefault)
 })
 
 

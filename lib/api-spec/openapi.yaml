@@ -1798,7 +1798,7 @@ components:
     # ── Meetings ───────────────────────────────────────────────────────────
     Meeting:
       type: object
-      required: [id, title, roomId, hostId, scheduledAt, durationMinutes, status, createdAt]
+      required: [id, title, roomId, hostId, scheduledAt, durationMinutes, status, kind, participantIds, createdAt]
       properties:
         id:
           type: integer
@@ -1822,6 +1822,12 @@ components:
         status:
           type: string
           enum: [scheduled, live, ended, cancelled]
+        kind:
+          type: string
+          enum: [one_on_one, group]
+        participantIds:
+          type: array
+          items: { type: integer }
         joinUrl:
           type: string
         createdAt:
@@ -1845,6 +1851,17 @@ components:
           minimum: 5
           maximum: 480
           default: 30
+        kind:
+          type: string
+          enum: [one_on_one, group]
+          default: group
+        participantIds:
+          type: array
+          items: { type: integer }
+          default: []
+        notifyEveryone:
+          type: boolean
+          default: false
 
     # ── Notifications ─────────────────────────────────────────────────────
     Notification:

@@ -49,6 +49,8 @@ export * from './listTasksParams';
 export * from './listUsersParams';
 export * from './meeting';
 export * from './meetingInput';
+export * from './meetingInputKind';
+export * from './meetingKind';
 export * from './meetingStatus';
 export * from './notification';
 export * from './notificationList';

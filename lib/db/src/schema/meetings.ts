@@ -1,4 +1,5 @@
 import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
@@ -12,6 +13,8 @@ export const meetingsTable = pgTable("meetings", {
   scheduledAt: timestamp("scheduled_at", { withTimezone: true }).notNull(),
   durationMinutes: integer("duration_minutes").notNull().default(30),
   status: text("status").notNull().default("scheduled"),
+  kind: text("kind").notNull().default("group"),
+  participantIds: integer("participant_ids").array().notNull().default(sql`'{}'::integer[]`),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

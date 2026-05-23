@@ -12,11 +12,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   useListMeetings, useCreateMeeting, useDeleteMeeting,
-  getListMeetingsQueryKey, useGetCurrentUser,
+  getListMeetingsQueryKey, useGetCurrentUser, useListUsers,
 } from "@workspace/api-client-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Video, Plus, Trash2, Calendar, Clock, Copy, ExternalLink } from "lucide-react";
+import { Video, Plus, Trash2, Calendar, Clock, Copy, ExternalLink, Users, User } from "lucide-react";
 
 const JITSI_BASE = "https://meet.jit.si";
 
@@ -35,8 +38,9 @@ function randomRoom(): string {
   return s;
 }
 
-function CreateMeetingDialog({ onCreated }: { onCreated: () => void }) {
+function CreateMeetingDialog({ onCreated, currentUserId }: { onCreated: () => void; currentUserId?: number }) {
   const [open, setOpen] = useState(false);
+  const [kind, setKind] = useState<"one_on_one" | "group">("group");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const now = new Date();
@@ -44,11 +48,23 @@ function CreateMeetingDialog({ onCreated }: { onCreated: () => void }) {
   const defaultWhen = now.toISOString().slice(0, 16);
   const [scheduledAt, setScheduledAt] = useState(defaultWhen);
   const [duration, setDuration] = useState(30);
+  const [oneOnOneId, setOneOnOneId] = useState<string>("");
+  const [groupIds, setGroupIds] = useState<number[]>([]);
+  const [notifyEveryone, setNotifyEveryone] = useState(true);
   const create = useCreateMeeting();
+  const { data: users } = useListUsers();
   const { toast } = useToast();
 
+  const userList: any[] = Array.isArray(users) ? users : (users as any)?.users ?? [];
+  const others = userList.filter((u: any) => u.id !== currentUserId && u.status !== "inactive");
+
   const reset = () => {
-    setTitle(""); setDescription(""); setDuration(30);
+    setKind("group"); setTitle(""); setDescription(""); setDuration(30);
+    setOneOnOneId(""); setGroupIds([]); setNotifyEveryone(true);
+  };
+
+  const toggleGroup = (id: number) => {
+    setGroupIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   };
 
   const submit = async () => {
@@ -56,6 +72,22 @@ function CreateMeetingDialog({ onCreated }: { onCreated: () => void }) {
       toast({ title: "Title required", variant: "destructive" });
       return;
     }
+    let participantIds: number[] = [];
+    if (kind === "one_on_one") {
+      const id = Number(oneOnOneId);
+      if (!id) {
+        toast({ title: "Select one person", variant: "destructive" });
+        return;
+      }
+      participantIds = [id];
+    } else if (!notifyEveryone) {
+      if (groupIds.length === 0) {
+        toast({ title: "Select participants or choose 'Everyone'", variant: "destructive" });
+        return;
+      }
+      participantIds = groupIds;
+    }
+
     try {
       await create.mutateAsync({
         data: {
@@ -63,6 +95,9 @@ function CreateMeetingDialog({ onCreated }: { onCreated: () => void }) {
           description: description.trim() || null,
           scheduledAt: new Date(scheduledAt).toISOString(),
           durationMinutes: duration,
+          kind,
+          participantIds,
+          notifyEveryone: kind === "group" && notifyEveryone,
         } as any,
       });
       toast({ title: "Meeting scheduled" });
@@ -81,18 +116,89 @@ function CreateMeetingDialog({ onCreated }: { onCreated: () => void }) {
           <Plus className="w-4 h-4" /> Schedule
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Schedule a meeting</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label htmlFor="m-title">Title</Label>
-            <Input id="m-title" data-testid="input-meeting-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Weekly sync" />
+            <Label>Type</Label>
+            <RadioGroup value={kind} onValueChange={(v) => setKind(v as any)} className="grid grid-cols-2 gap-2">
+              <label
+                data-testid="radio-kind-one-on-one"
+                className={`flex items-center gap-2 border rounded-md px-3 py-2 cursor-pointer ${kind === "one_on_one" ? "border-primary bg-primary/5" : "border-input"}`}
+              >
+                <RadioGroupItem value="one_on_one" />
+                <User className="w-4 h-4" /> 1-on-1
+              </label>
+              <label
+                data-testid="radio-kind-group"
+                className={`flex items-center gap-2 border rounded-md px-3 py-2 cursor-pointer ${kind === "group" ? "border-primary bg-primary/5" : "border-input"}`}
+              >
+                <RadioGroupItem value="group" />
+                <Users className="w-4 h-4" /> Group
+              </label>
+            </RadioGroup>
           </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="m-title">Title</Label>
+            <Input id="m-title" data-testid="input-meeting-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={kind === "one_on_one" ? "Catch-up" : "Weekly sync"} />
+          </div>
+
+          {kind === "one_on_one" ? (
+            <div className="space-y-1.5">
+              <Label>Meet with</Label>
+              <Select value={oneOnOneId} onValueChange={setOneOnOneId}>
+                <SelectTrigger data-testid="select-one-on-one-user">
+                  <SelectValue placeholder="Pick a teammate" />
+                </SelectTrigger>
+                <SelectContent>
+                  {others.map((u: any) => (
+                    <SelectItem key={u.id} value={String(u.id)}>
+                      {u.firstName} {u.lastName}{u.jobTitle ? ` — ${u.jobTitle}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label>Participants</Label>
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  data-testid="checkbox-notify-everyone"
+                  checked={notifyEveryone}
+                  onCheckedChange={(c) => setNotifyEveryone(c === true)}
+                />
+                Invite everyone in the workplace
+              </label>
+              {!notifyEveryone && (
+                <div className="max-h-48 overflow-y-auto border rounded-md divide-y">
+                  {others.length === 0 ? (
+                    <p className="p-3 text-sm text-muted-foreground">No other users available.</p>
+                  ) : others.map((u: any) => (
+                    <label key={u.id} className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-accent">
+                      <Checkbox
+                        data-testid={`checkbox-participant-${u.id}`}
+                        checked={groupIds.includes(u.id)}
+                        onCheckedChange={() => toggleGroup(u.id)}
+                      />
+                      <span className="flex-1">{u.firstName} {u.lastName}</span>
+                      {u.jobTitle && <span className="text-xs text-muted-foreground">{u.jobTitle}</span>}
+                    </label>
+                  ))}
+                </div>
+              )}
+              {!notifyEveryone && groupIds.length > 0 && (
+                <p className="text-xs text-muted-foreground">{groupIds.length} selected</p>
+              )}
+            </div>
+          )}
+
           <div className="space-y-1.5">
             <Label htmlFor="m-desc">Description</Label>
-            <Textarea id="m-desc" data-testid="input-meeting-description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Agenda or notes (optional)" rows={3} />
+            <Textarea id="m-desc" data-testid="input-meeting-description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Agenda or notes (optional)" rows={2} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -150,8 +256,13 @@ function MeetingCard({ m, currentUserId, isAdmin, onDeleted }: {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <Video className="w-4 h-4 text-primary flex-shrink-0" />
+              {m.kind === "one_on_one"
+                ? <User className="w-4 h-4 text-primary flex-shrink-0" />
+                : <Users className="w-4 h-4 text-primary flex-shrink-0" />}
               <h3 className="font-semibold truncate">{m.title}</h3>
+              <Badge variant="outline" className="text-[10px] uppercase">
+                {m.kind === "one_on_one" ? "1-on-1" : "Group"}
+              </Badge>
             </div>
             {m.description && (
               <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{m.description}</p>
@@ -225,7 +336,7 @@ export default function MeetingsPage() {
               </p>
             </div>
             <div className="flex gap-2">
-              <CreateMeetingDialog onCreated={invalidate} />
+              <CreateMeetingDialog onCreated={invalidate} currentUserId={currentUser?.id} />
               <Button data-testid="button-start-instant" onClick={startInstant} className="gap-2">
                 <Video className="w-4 h-4" /> Start Instant
               </Button>

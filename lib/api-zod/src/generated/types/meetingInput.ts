@@ -5,6 +5,7 @@
  * Digital Workplace API
  * OpenAPI spec version: 0.1.0
  */
+import type { MeetingInputKind } from './meetingInputKind';
 
 export interface MeetingInput {
   /** @minLength 1 */
@@ -17,4 +18,7 @@ export interface MeetingInput {
      * @maximum 480
      */
   durationMinutes?: number;
+  kind?: MeetingInputKind;
+  participantIds?: number[];
+  notifyEveryone?: boolean;
 }

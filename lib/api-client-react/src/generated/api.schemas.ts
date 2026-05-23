@@ -765,6 +765,14 @@ export const MeetingStatus = {
   cancelled: 'cancelled',
 } as const;
 
+export type MeetingKind = typeof MeetingKind[keyof typeof MeetingKind];
+
+
+export const MeetingKind = {
+  one_on_one: 'one_on_one',
+  group: 'group',
+} as const;
+
 export interface Meeting {
   id: number;
   title: string;
@@ -779,9 +787,19 @@ export interface Meeting {
   scheduledAt: string;
   durationMinutes: number;
   status: MeetingStatus;
+  kind: MeetingKind;
+  participantIds: number[];
   joinUrl?: string;
   createdAt: string;
 }
+
+export type MeetingInputKind = typeof MeetingInputKind[keyof typeof MeetingInputKind];
+
+
+export const MeetingInputKind = {
+  one_on_one: 'one_on_one',
+  group: 'group',
+} as const;
 
 export interface MeetingInput {
   /** @minLength 1 */
@@ -794,6 +812,9 @@ export interface MeetingInput {
      * @maximum 480
      */
   durationMinutes?: number;
+  kind?: MeetingInputKind;
+  participantIds?: number[];
+  notifyEveryone?: boolean;
 }
 
 export interface Notification {

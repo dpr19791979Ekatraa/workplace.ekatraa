@@ -5,6 +5,7 @@
  * Digital Workplace API
  * OpenAPI spec version: 0.1.0
  */
+import type { MeetingKind } from './meetingKind';
 import type { MeetingStatus } from './meetingStatus';
 
 export interface Meeting {
@@ -21,6 +22,8 @@ export interface Meeting {
   scheduledAt: Date;
   durationMinutes: number;
   status: MeetingStatus;
+  kind: MeetingKind;
+  participantIds: number[];
   joinUrl?: string;
   createdAt: Date;
 }
