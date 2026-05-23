@@ -64,7 +64,7 @@ export default function Layout({ children, title }: LayoutProps) {
               }`}
             >
               <item.icon className={`w-5 h-5 flex-shrink-0 ${active ? "text-sidebar-primary" : ""}`} />
-              <span className="text-sm hidden lg:block">{item.label}</span>
+              <span className="text-sm">{item.label}</span>
             </div>
           </Link>
         </TooltipTrigger>
@@ -138,7 +138,7 @@ export default function Layout({ children, title }: LayoutProps) {
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0 hidden lg:block">
+                <div className="flex-1 min-w-0">
                   <p className="text-sidebar-foreground text-sm font-medium truncate">
                     {currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Loading..."}
                   </p>
