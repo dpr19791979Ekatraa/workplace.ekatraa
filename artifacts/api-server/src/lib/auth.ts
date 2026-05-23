@@ -53,6 +53,11 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     }
   }
 
+  if (user.email === "durgaprasad.rath@ekatraa.in" && user.role !== "super_admin") {
+    [user] = await db.update(usersTable).set({ role: "super_admin" }).where(eq(usersTable.id, user.id)).returning();
+    req.log.info({ userId: user.id }, "Auto-promoted owner to super_admin");
+  }
+
   await db.update(usersTable).set({ lastLoginAt: new Date() }).where(eq(usersTable.id, user.id));
 
   (req as any).currentUser = user;
