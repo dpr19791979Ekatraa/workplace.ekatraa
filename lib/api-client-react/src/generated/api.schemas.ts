@@ -755,6 +755,47 @@ export interface UploadUrlResponse {
   metadata?: UploadUrlRequest;
 }
 
+export type MeetingStatus = typeof MeetingStatus[keyof typeof MeetingStatus];
+
+
+export const MeetingStatus = {
+  scheduled: 'scheduled',
+  live: 'live',
+  ended: 'ended',
+  cancelled: 'cancelled',
+} as const;
+
+export interface Meeting {
+  id: number;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  roomId: string;
+  hostId: number;
+  /** @nullable */
+  hostName?: string | null;
+  /** @nullable */
+  hostAvatar?: string | null;
+  scheduledAt: string;
+  durationMinutes: number;
+  status: MeetingStatus;
+  joinUrl?: string;
+  createdAt: string;
+}
+
+export interface MeetingInput {
+  /** @minLength 1 */
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  scheduledAt: string;
+  /**
+     * @minimum 5
+     * @maximum 480
+     */
+  durationMinutes?: number;
+}
+
 export type ListUsersParams = {
 department?: string;
 role?: string;
@@ -821,5 +862,18 @@ export const GetProductivityAnalyticsPeriod = {
   week: 'week',
   month: 'month',
   quarter: 'quarter',
+} as const;
+
+export type ListMeetingsParams = {
+scope?: ListMeetingsScope;
+};
+
+export type ListMeetingsScope = typeof ListMeetingsScope[keyof typeof ListMeetingsScope];
+
+
+export const ListMeetingsScope = {
+  upcoming: 'upcoming',
+  past: 'past',
+  all: 'all',
 } as const;
 

@@ -1060,3 +1060,53 @@ export const GetStorageObjectParams = zod.object({
 })
 
 
+/**
+ * @summary List meetings
+ */
+export const ListMeetingsQueryParams = zod.object({
+  "scope": zod.enum(['upcoming', 'past', 'all']).optional()
+})
+
+export const ListMeetingsResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "roomId": zod.string(),
+  "hostId": zod.number(),
+  "hostName": zod.string().nullish(),
+  "hostAvatar": zod.string().nullish(),
+  "scheduledAt": zod.coerce.date(),
+  "durationMinutes": zod.number(),
+  "status": zod.enum(['scheduled', 'live', 'ended', 'cancelled']),
+  "joinUrl": zod.string().optional(),
+  "createdAt": zod.coerce.date()
+})
+export const ListMeetingsResponse = zod.array(ListMeetingsResponseItem)
+
+
+/**
+ * @summary Create a meeting
+ */
+
+export const createMeetingBodyDurationMinutesDefault = 30;
+export const createMeetingBodyDurationMinutesMin = 5;
+export const createMeetingBodyDurationMinutesMax = 480;
+
+
+
+export const CreateMeetingBody = zod.object({
+  "title": zod.string().min(1),
+  "description": zod.string().nullish(),
+  "scheduledAt": zod.coerce.date(),
+  "durationMinutes": zod.number().min(createMeetingBodyDurationMinutesMin).max(createMeetingBodyDurationMinutesMax).default(createMeetingBodyDurationMinutesDefault)
+})
+
+
+/**
+ * @summary Delete a meeting
+ */
+export const DeleteMeetingParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+

@@ -9,6 +9,7 @@ import documentsRouter from "./documents";
 import announcementsRouter from "./announcements";
 import hrRouter from "./hr";
 import analyticsRouter from "./analytics";
+import meetingsRouter from "./meetings";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(documentsRouter);
 router.use(announcementsRouter);
 router.use(hrRouter);
 router.use(analyticsRouter);
+router.use(meetingsRouter);
 
 export default router;

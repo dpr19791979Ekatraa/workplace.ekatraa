@@ -16,6 +16,7 @@ import ProjectDetailPage from "@/pages/project-detail";
 import TasksPage from "@/pages/tasks";
 import DocumentsPage from "@/pages/documents";
 import HRPage from "@/pages/hr";
+import MeetingsPage from "@/pages/meetings";
 import AnalyticsPage from "@/pages/analytics";
 import PolicyPage from "@/pages/policy";
 import AdminPage from "@/pages/admin";
@@ -190,6 +191,7 @@ function ClerkProviderWithRoutes() {
           <Route path="/tasks" component={() => <ProtectedRoute component={TasksPage} />} />
           <Route path="/documents" component={() => <ProtectedRoute component={DocumentsPage} />} />
           <Route path="/hr" component={() => <ProtectedRoute component={HRPage} />} />
+          <Route path="/meetings" component={() => <ProtectedRoute component={MeetingsPage} />} />
           <Route path="/analytics" component={() => <ProtectedRoute component={AnalyticsPage} />} />
           <Route path="/policy" component={() => <ProtectedRoute component={PolicyPage} />} />
           <Route path="/admin" component={() => <ProtectedRoute component={AdminPage} />} />
