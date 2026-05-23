@@ -189,6 +189,155 @@ function CreateEmployeeDialog({ departments }: { departments: any[] }) {
   );
 }
 
+function EditEmployeeDialog({ user, departments }: { user: any; departments: any[] }) {
+  const [open, setOpen] = useState(false);
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const updateUser = useUpdateUser();
+
+  const form = useForm<EditEmployeeForm>({
+    resolver: zodResolver(editEmployeeSchema),
+    values: {
+      firstName: user.firstName ?? "",
+      lastName: user.lastName ?? "",
+      email: user.email ?? "",
+      role: user.role ?? "employee",
+      jobTitle: user.jobTitle ?? "",
+      departmentId: user.departmentId ?? undefined,
+      status: user.status ?? "active",
+    },
+  });
+
+  const onSubmit = (data: EditEmployeeForm) => {
+    const payload: any = { ...data };
+    if (!payload.jobTitle) payload.jobTitle = null;
+    if (!payload.departmentId) delete payload.departmentId;
+    updateUser.mutate({ id: user.id, data: payload }, {
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: getListUsersQueryKey() });
+        toast({ title: "Employee updated" });
+        setOpen(false);
+      },
+      onError: () => toast({ title: "Failed to update employee", variant: "destructive" }),
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" data-testid={`edit-user-${user.id}`}>
+          <Pencil className="w-4 h-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Employee</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField control={form.control} name="firstName" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} data-testid={`edit-first-name-${user.id}`} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="lastName" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} data-testid={`edit-last-name-${user.id}`} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+            <FormField control={form.control} name="email" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input type="email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="jobTitle" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Job Title</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. Senior Engineer" {...field} value={field.value ?? ""} />
+                </FormControl>
+              </FormItem>
+            )} />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField control={form.control} name="role" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="employee">Employee</SelectItem>
+                      <SelectItem value="team_leader">Team Leader</SelectItem>
+                      <SelectItem value="hr_manager">HR Manager</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="super_admin">Super Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="status" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )} />
+            </div>
+            <FormField control={form.control} name="departmentId" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Department</FormLabel>
+                <Select
+                  value={field.value ? String(field.value) : "none"}
+                  onValueChange={v => field.onChange(v !== "none" ? Number(v) : undefined)}
+                >
+                  <FormControl>
+                    <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {departments.map((d: any) => (
+                      <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )} />
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={updateUser.isPending} data-testid={`submit-edit-user-${user.id}`}>
+                {updateUser.isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function CreateDepartmentDialog() {
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
@@ -294,7 +443,11 @@ export default function AdminPage() {
     deleteUser.mutate({ id: userId }, {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getListUsersQueryKey() });
-        toast({ title: "User deleted" });
+        toast({ title: "Employee deleted" });
+      },
+      onError: (err: any) => {
+        const msg = err?.response?.data?.error ?? "Failed to delete employee";
+        toast({ title: msg, variant: "destructive" });
       },
     });
   };
@@ -346,29 +499,16 @@ export default function AdminPage() {
                           <p className="text-sm font-medium text-foreground">{user.firstName} {user.lastName}</p>
                           <p className="text-xs text-muted-foreground">{user.email}</p>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <Select value={user.role} onValueChange={(v) => handleRoleChange(user.id, v)}>
-                            <SelectTrigger className="h-7 text-xs w-32 hidden sm:flex" data-testid={`user-role-${user.id}`}>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="super_admin">Super Admin</SelectItem>
-                              <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="hr_manager">HR Manager</SelectItem>
-                              <SelectItem value="team_leader">Team Leader</SelectItem>
-                              <SelectItem value="employee">Employee</SelectItem>
-                              <SelectItem value="guest">Guest</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className={`h-7 text-xs hidden md:flex ${user.status === "active" ? "border-emerald-200 text-emerald-600" : "border-slate-200 text-slate-500"}`}
-                            data-testid={`toggle-user-status-${user.id}`}
-                            onClick={() => handleStatusToggle(user.id, user.status)}
-                          >
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium hidden sm:inline-flex ${roleColors[user.role] ?? "bg-slate-100 text-slate-600"}`}>
+                            {user.role?.replace(/_/g, " ")}
+                          </span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full hidden md:inline-flex ${user.status === "active" ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500"}`}>
                             {user.status}
-                          </Button>
+                          </span>
+                          {isSuperAdmin && (
+                            <EditEmployeeDialog user={user} departments={(departments as any[]) ?? []} />
+                          )}
                           {isSuperAdmin && user.id !== currentUser?.id && (
                             <Button
                               variant="ghost"

@@ -119,8 +119,16 @@ router.delete("/users/:id", requireAuth, requireRole(["super_admin", "admin"]), 
     res.status(400).json({ error: params.error.message });
     return;
   }
-  await db.delete(usersTable).where(eq(usersTable.id, params.data.id));
-  res.sendStatus(204);
+  try {
+    await db.delete(usersTable).where(eq(usersTable.id, params.data.id));
+    res.sendStatus(204);
+  } catch (err: any) {
+    if (err?.code === "23503") {
+      res.status(409).json({ error: "Cannot delete: this employee has linked projects, tasks, or other records. Reassign them first." });
+    } else {
+      throw err;
+    }
+  }
 });
 
 export default router;
