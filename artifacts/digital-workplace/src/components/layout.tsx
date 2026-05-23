@@ -84,7 +84,6 @@ export default function Layout({ children, title }: LayoutProps) {
           onClick={() => setSidebarOpen(false)}
         />
       )}
-
       {/* Sidebar */}
       <aside
         className={`
@@ -96,7 +95,7 @@ export default function Layout({ children, title }: LayoutProps) {
         `}
       >
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-4 py-5 border-b border-sidebar-border">
+        <div className="flex items-center gap-2.5 px-4 py-5 border-b border-sidebar-border text-[#000000]">
           <img src="/logo.png" className="h-16 w-auto" alt="ekatraa" />
           <Button
             variant="ghost"
@@ -181,7 +180,6 @@ export default function Layout({ children, title }: LayoutProps) {
           </DropdownMenu>
         </div>
       </aside>
-
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top bar */}
