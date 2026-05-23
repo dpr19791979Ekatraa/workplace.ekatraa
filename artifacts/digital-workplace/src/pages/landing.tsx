@@ -8,8 +8,9 @@ export default function LandingPage() {
       {/* Nav */}
       <nav className="border-b border-border bg-background/95 backdrop-blur sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src="/logo.svg" className="h-10 w-auto" alt="ekatraa" />
+          <div className="flex items-center gap-2.5">
+            <img src="/logo-icon.svg" className="h-9 w-auto" alt="" />
+            <span className="font-bold text-xl tracking-tight text-foreground">ekatraa</span>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" asChild data-testid="sign-in-link">
