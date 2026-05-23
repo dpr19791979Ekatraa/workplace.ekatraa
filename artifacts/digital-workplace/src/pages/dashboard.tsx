@@ -170,15 +170,31 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
               {(analytics.upcomingDeadlines as any[]).map((task: any) => (
                 <Card key={task.id} data-testid={`deadline-task-${task.id}`}>
-                  <CardContent className="p-4">
+                  <CardContent className="p-4 space-y-2">
                     <p className="text-sm font-medium text-foreground truncate">{task.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{task.dueDate}</p>
-                    <Badge
-                      variant="outline"
-                      className={`mt-2 text-xs ${task.priority === "critical" ? "border-red-300 text-red-600" : task.priority === "high" ? "border-orange-300 text-orange-600" : ""}`}
-                    >
-                      {task.priority}
-                    </Badge>
+                    {task.projectName && (
+                      <p className="text-xs text-muted-foreground truncate">{task.projectName}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">{task.dueDate}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <Badge
+                        variant="outline"
+                        className={`text-xs ${task.priority === "critical" ? "border-red-300 text-red-600" : task.priority === "high" ? "border-orange-300 text-orange-600" : ""}`}
+                      >
+                        {task.priority}
+                      </Badge>
+                      {task.assigneeName && (
+                        <div className="flex items-center gap-1.5">
+                          <Avatar className="w-5 h-5">
+                            <AvatarImage src={task.assigneeAvatar} />
+                            <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
+                              {task.assigneeName[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-xs text-muted-foreground truncate max-w-[80px]">{task.assigneeName}</span>
+                        </div>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}

@@ -241,9 +241,14 @@ export default function ProjectsPage() {
                         {project.priority}
                       </span>
                     </div>
-                    {project.dueDate && (
-                      <p className="text-xs text-muted-foreground">Due {project.dueDate}</p>
-                    )}
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      {project.dueDate && (
+                        <span>Due {project.dueDate}</span>
+                      )}
+                      {project.ownerName && (
+                        <span className="ml-auto">by {project.ownerName}</span>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               </Link>

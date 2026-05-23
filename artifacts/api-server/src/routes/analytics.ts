@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, desc, sql, and } from "drizzle-orm";
 import {
   db, usersTable, projectsTable, tasksTable, documentsTable,
-  attendanceTable, leavesTable, activityLogTable,
+  attendanceTable, leavesTable, activityLogTable, departmentsTable,
 } from "@workspace/db";
 import { requireAuth } from "../lib/auth";
 import { GetActivityFeedQueryParams, GetProductivityAnalyticsQueryParams } from "@workspace/api-zod";
@@ -24,17 +24,55 @@ router.get("/analytics/dashboard", requireAuth, async (_req, res): Promise<void>
   const projectsByStatusRaw = await db.select({ status: projectsTable.status, count: sql<number>`count(*)::int` })
     .from(projectsTable).groupBy(projectsTable.status);
 
-  const recentHires = await db.select().from(usersTable)
+  const recentHiresRaw = await db.select().from(usersTable)
     .orderBy(desc(usersTable.createdAt)).limit(4);
 
+  const recentHires = await Promise.all(recentHiresRaw.map(async u => {
+    let departmentName: string | null = null;
+    if (u.departmentId) {
+      const [dept] = await db.select({ name: departmentsTable.name })
+        .from(departmentsTable).where(eq(departmentsTable.id, u.departmentId)).limit(1);
+      departmentName = dept?.name ?? null;
+    }
+    return { ...u, departmentName };
+  }));
+
   const now = new Date().toISOString().split("T")[0];
-  const upcomingDeadlines = await db.select().from(tasksTable)
+  const upcomingDeadlinesRaw = await db.select().from(tasksTable)
     .where(and(
       sql`${tasksTable.dueDate} >= ${now}`,
       sql`${tasksTable.status} not in ('done')`,
     ))
     .orderBy(tasksTable.dueDate)
     .limit(5);
+
+  const upcomingDeadlines = await Promise.all(upcomingDeadlinesRaw.map(async t => {
+    let assigneeName: string | null = null;
+    let assigneeAvatar: string | null = null;
+    if (t.assigneeId) {
+      const [u] = await db.select({ firstName: usersTable.firstName, lastName: usersTable.lastName, avatarUrl: usersTable.avatarUrl })
+        .from(usersTable).where(eq(usersTable.id, t.assigneeId)).limit(1);
+      if (u) {
+        assigneeName = `${u.firstName} ${u.lastName}`.trim();
+        assigneeAvatar = u.avatarUrl;
+      }
+    }
+    let projectName: string | null = null;
+    if (t.projectId) {
+      const [p] = await db.select({ name: projectsTable.name })
+        .from(projectsTable).where(eq(projectsTable.id, t.projectId)).limit(1);
+      projectName = p?.name ?? null;
+    }
+    return {
+      ...t,
+      tags: t.tags ?? [],
+      estimatedHours: t.estimatedHours ? parseFloat(t.estimatedHours) : null,
+      loggedHours: t.loggedHours ? parseFloat(t.loggedHours) : null,
+      assigneeName,
+      assigneeAvatar,
+      projectName,
+    };
+  }));
 
   res.json({
     totalEmployees,
@@ -45,19 +83,8 @@ router.get("/analytics/dashboard", requireAuth, async (_req, res): Promise<void>
     pendingLeaves,
     tasksByStatus: tasksByStatusRaw.map(r => ({ label: r.status, count: r.count })),
     projectsByStatus: projectsByStatusRaw.map(r => ({ label: r.status, count: r.count })),
-    recentHires: recentHires.map(u => ({
-      ...u,
-      departmentName: null,
-    })),
-    upcomingDeadlines: upcomingDeadlines.map(t => ({
-      ...t,
-      tags: t.tags ?? [],
-      estimatedHours: t.estimatedHours ? parseFloat(t.estimatedHours) : null,
-      loggedHours: t.loggedHours ? parseFloat(t.loggedHours) : null,
-      assigneeName: null,
-      assigneeAvatar: null,
-      projectName: null,
-    })),
+    recentHires,
+    upcomingDeadlines,
   });
 });
 
