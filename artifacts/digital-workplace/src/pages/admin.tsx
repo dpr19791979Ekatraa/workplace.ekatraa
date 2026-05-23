@@ -21,7 +21,7 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Building2, Search } from "lucide-react";
+import { Plus, Trash2, Building2, Search, Pencil } from "lucide-react";
 
 const roleColors: Record<string, string> = {
   super_admin: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
@@ -42,6 +42,18 @@ const createEmployeeSchema = z.object({
 });
 
 type CreateEmployeeForm = z.infer<typeof createEmployeeSchema>;
+
+const editEmployeeSchema = z.object({
+  firstName: z.string().min(1, "First name required"),
+  lastName: z.string().min(1, "Last name required"),
+  email: z.string().email("Valid email required"),
+  role: z.string(),
+  jobTitle: z.string().optional(),
+  departmentId: z.number().optional(),
+  status: z.string(),
+});
+
+type EditEmployeeForm = z.infer<typeof editEmployeeSchema>;
 
 const createDeptSchema = z.object({
   name: z.string().min(1, "Name required"),
