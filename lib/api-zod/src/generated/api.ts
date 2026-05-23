@@ -1110,3 +1110,39 @@ export const DeleteMeetingParams = zod.object({
 })
 
 
+/**
+ * @summary List notifications for the current user
+ */
+export const listNotificationsQueryLimitDefault = 30;
+export const listNotificationsQueryLimitMax = 100;
+
+
+
+export const ListNotificationsQueryParams = zod.object({
+  "unreadOnly": zod.coerce.boolean().optional(),
+  "limit": zod.coerce.number().min(1).max(listNotificationsQueryLimitMax).default(listNotificationsQueryLimitDefault)
+})
+
+export const ListNotificationsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "type": zod.string(),
+  "title": zod.string(),
+  "body": zod.string().nullish(),
+  "link": zod.string().nullish(),
+  "read": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})),
+  "unreadCount": zod.number()
+})
+
+
+/**
+ * @summary Mark a notification as read
+ */
+export const MarkNotificationReadParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+

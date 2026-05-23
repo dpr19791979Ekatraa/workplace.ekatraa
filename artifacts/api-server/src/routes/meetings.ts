@@ -8,6 +8,7 @@ import {
   DeleteMeetingParams,
 } from "@workspace/api-zod";
 import { logActivity } from "../lib/activity";
+import { notifyAllUsers } from "../lib/notifications";
 import { randomBytes } from "crypto";
 
 const router: IRouter = Router();
@@ -70,6 +71,17 @@ router.post("/meetings", requireAuth, async (req, res): Promise<void> => {
     status: "scheduled",
   }).returning();
   await logActivity(user.id, "meeting_created", `Scheduled meeting "${m.title}"`, m.id, "meeting");
+  const when = new Date(m.scheduledAt).toLocaleString(undefined, {
+    month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+  });
+  const hostName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "A teammate";
+  await notifyAllUsers({
+    type: "meeting_scheduled",
+    title: `New meeting: ${m.title}`,
+    body: `${hostName} scheduled "${m.title}" for ${when}`,
+    link: "/meetings",
+    excludeUserId: user.id,
+  });
   res.status(201).json(await formatMeeting(m));
 });
 

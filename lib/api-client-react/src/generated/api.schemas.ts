@@ -796,6 +796,24 @@ export interface MeetingInput {
   durationMinutes?: number;
 }
 
+export interface Notification {
+  id: number;
+  userId: number;
+  type: string;
+  title: string;
+  /** @nullable */
+  body?: string | null;
+  /** @nullable */
+  link?: string | null;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface NotificationList {
+  items: Notification[];
+  unreadCount: number;
+}
+
 export type ListUsersParams = {
 department?: string;
 role?: string;
@@ -876,4 +894,13 @@ export const ListMeetingsScope = {
   past: 'past',
   all: 'all',
 } as const;
+
+export type ListNotificationsParams = {
+unreadOnly?: boolean;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: number;
+};
 

@@ -10,6 +10,7 @@ import announcementsRouter from "./announcements";
 import hrRouter from "./hr";
 import analyticsRouter from "./analytics";
 import meetingsRouter from "./meetings";
+import notificationsRouter from "./notifications";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(announcementsRouter);
 router.use(hrRouter);
 router.use(analyticsRouter);
 router.use(meetingsRouter);
+router.use(notificationsRouter);
 
 export default router;

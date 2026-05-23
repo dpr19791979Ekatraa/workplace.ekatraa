@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import NotificationBell from "@/components/notification-bell";
 import {
   LayoutDashboard, FolderKanban, CheckSquare, FileText, Users,
   BarChart2, Settings, LogOut, Sun, Moon, Menu, X, Shield, BookOpen, Video,
@@ -197,6 +198,7 @@ export default function Layout({ children, title }: LayoutProps) {
           </Button>
           <h1 className="text-base font-semibold text-foreground">{title}</h1>
           <div className="ml-auto flex items-center gap-2">
+            <NotificationBell />
             {currentUser && (
               <Badge variant="outline" className="text-xs hidden sm:flex">
                 {currentUser.role?.replace(/_/g, " ")}
