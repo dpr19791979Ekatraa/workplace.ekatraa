@@ -17,7 +17,7 @@ import { z } from "zod";
 import {
   useListUsers, useListLeaves, useUpdateLeaveStatus, useCreateAnnouncement,
   useGetAttendanceSummary, useClockIn, useClockOut, useListAnnouncements,
-  useGetCurrentUser, useDeleteAnnouncement,
+  useGetCurrentUser, useDeleteAnnouncement, useCreateLeave,
   getListLeavesQueryKey, getListUsersQueryKey, getListAnnouncementsQueryKey,
   getGetAttendanceSummaryQueryKey,
 } from "@workspace/api-client-react";
@@ -114,6 +114,131 @@ function CreateAnnouncementDialog() {
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={createAnn.isPending} data-testid="submit-announcement">
                 {createAnn.isPending ? "Posting..." : "Post"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const createLeaveSchema = z.object({
+  type: z.string().min(1, "Type required"),
+  startDate: z.string().min(1, "Start date required"),
+  endDate: z.string().min(1, "End date required"),
+  reason: z.string().optional(),
+}).refine(d => d.endDate >= d.startDate, { message: "End date must be after start date", path: ["endDate"] });
+
+type CreateLeaveForm = z.infer<typeof createLeaveSchema>;
+
+function CreateLeaveDialog({ currentUserId }: { currentUserId: number }) {
+  const [open, setOpen] = useState(false);
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const createLeave = useCreateLeave();
+
+  const form = useForm<CreateLeaveForm>({
+    resolver: zodResolver(createLeaveSchema),
+    defaultValues: { type: "annual", startDate: "", endDate: "", reason: "" },
+  });
+
+  const calcDays = (start: string, end: string) => {
+    if (!start || !end) return 1;
+    const s = new Date(start);
+    const e = new Date(end);
+    return Math.max(1, Math.round((e.getTime() - s.getTime()) / 86400000) + 1);
+  };
+
+  const onSubmit = (data: CreateLeaveForm) => {
+    const days = calcDays(data.startDate, data.endDate);
+    createLeave.mutate({ data: { ...data, userId: currentUserId, days, status: "pending" } as any }, {
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: getListLeavesQueryKey() });
+        toast({ title: "Leave request submitted" });
+        setOpen(false);
+        form.reset();
+      },
+      onError: (err: any) => {
+        const msg = err?.response?.data?.error ?? err?.message ?? "Failed to submit leave";
+        toast({ title: msg, variant: "destructive" });
+      },
+    });
+  };
+
+  const start = form.watch("startDate");
+  const end = form.watch("endDate");
+  const previewDays = start && end ? calcDays(start, end) : null;
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" data-testid="create-leave-button">
+          <Plus className="w-4 h-4 mr-1" /> Request Leave
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Request Leave</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField control={form.control} name="type" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Leave type</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger data-testid="select-leave-type"><SelectValue /></SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="annual">Annual leave</SelectItem>
+                    <SelectItem value="sick">Sick leave</SelectItem>
+                    <SelectItem value="casual">Casual leave</SelectItem>
+                    <SelectItem value="maternity">Maternity leave</SelectItem>
+                    <SelectItem value="paternity">Paternity leave</SelectItem>
+                    <SelectItem value="bereavement">Bereavement leave</SelectItem>
+                    <SelectItem value="unpaid">Unpaid leave</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <div className="grid grid-cols-2 gap-3">
+              <FormField control={form.control} name="startDate" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start date</FormLabel>
+                  <FormControl>
+                    <Input type="date" data-testid="input-leave-start" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="endDate" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>End date</FormLabel>
+                  <FormControl>
+                    <Input type="date" data-testid="input-leave-end" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+            {previewDays !== null && (
+              <p className="text-xs text-muted-foreground">Total: {previewDays} day{previewDays !== 1 ? "s" : ""}</p>
+            )}
+            <FormField control={form.control} name="reason" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Reason (optional)</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Briefly explain the reason..." rows={3} data-testid="input-leave-reason" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={createLeave.isPending} data-testid="submit-leave">
+                {createLeave.isPending ? "Submitting..." : "Submit"}
               </Button>
             </div>
           </form>
@@ -238,6 +363,9 @@ export default function HRPage() {
 
           {/* Leaves tab */}
           <TabsContent value="leaves" className="mt-4 space-y-3">
+            <div className="flex justify-end">
+              {currentUser?.id && <CreateLeaveDialog currentUserId={currentUser.id} />}
+            </div>
             {leavesLoading ? (
               <div className="space-y-2">
                 {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-lg" />)}
