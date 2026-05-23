@@ -1,0 +1,2 @@
+- [Clerk React version](clerk-react-version.md) — use @clerk/react@6.x (latest); v5 has only one broken stable release (5.54.0 with bad @clerk/shared peer)
+- [Seed script pattern](seed-script-pattern.md) — always use returned IDs from INSERT RETURNING; never hardcode serial PKs across inserts

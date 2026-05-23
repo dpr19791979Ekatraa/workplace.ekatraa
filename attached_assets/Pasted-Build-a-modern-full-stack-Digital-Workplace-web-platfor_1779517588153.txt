@@ -1,0 +1,489 @@
+Build a modern full-stack “Digital Workplace” web platform for my company where all team members can securely access, create, upload, organize, and collaborate on work-related resources such as forms, spreadsheets, presentations, documents, tasks, media files, links, announcements, and internal tools — similar to a combination of Google Workspace, Notion, Slack, and an Admin ERP panel.
+
+The platform should be scalable, mobile responsive, secure, fast, and designed for real business operations.
+
+========================================
+CORE PLATFORM GOAL
+==================
+
+Create a centralized company workspace where:
+
+* Employees can log in and access company resources.
+* Teams can collaborate on projects.
+* Admins can manage employees, permissions, storage, tasks, and company operations.
+* Files and tools are organized department-wise and project-wise.
+* Everything works from one dashboard.
+
+========================================
+TECH STACK
+==========
+
+Frontend:
+
+* Next.js (Latest App Router)
+* TypeScript
+* Tailwind CSS
+* ShadCN UI
+* Framer Motion
+* Zustand or Redux Toolkit
+* React Query / TanStack Query
+
+Backend:
+
+* Node.js + Express.js OR Next.js API Routes
+* PostgreSQL
+* Prisma ORM
+
+Authentication:
+
+* JWT + Refresh Tokens
+* Role-based authentication
+* Google Login
+* Email OTP verification
+
+Storage:
+
+* AWS S3 or Cloudinary for file uploads
+
+Realtime:
+
+* Socket.IO or WebSockets
+
+Deployment:
+
+* Vercel (Frontend)
+* Railway / Render / AWS (Backend)
+* PostgreSQL Database
+
+========================================
+USER ROLES
+==========
+
+1. Super Admin
+2. Admin
+3. HR Manager
+4. Team Leader
+5. Employee
+6. Guest / Client
+
+Each role should have customizable permissions.
+
+========================================
+AUTHENTICATION SYSTEM
+=====================
+
+Features:
+
+* Login
+* Signup
+* Forgot Password
+* Email Verification
+* OTP Authentication
+* Google OAuth
+* Session Management
+* Device Tracking
+* Secure Logout
+* Role-based Access Control (RBAC)
+
+========================================
+MAIN MODULES
+============
+
+1. COMPANY DASHBOARD
+
+---
+
+* Welcome Dashboard
+* Daily Announcements
+* Company Updates
+* Team Activity Feed
+* Recent Files
+* Upcoming Meetings
+* Attendance Summary
+* Task Summary
+* Calendar Widget
+* Notifications Panel
+* Productivity Analytics
+
+========================================
+2. DOCUMENT MANAGEMENT SYSTEM
+=============================
+
+Employees can:
+
+* Upload documents
+* Create folders
+* Organize files
+* Share files internally
+* Search documents
+* Add tags
+* Add comments
+* Version history
+* File preview
+
+Supported files:
+
+* PDF
+* DOCX
+* XLSX
+* PPTX
+* Images
+* Videos
+* ZIP files
+
+Advanced:
+
+* Drag and drop upload
+* Bulk upload
+* Folder permissions
+* Shared workspace
+* Recent files
+* Starred files
+* Trash recovery
+* Activity logs
+
+========================================
+3. GOOGLE WORKSPACE STYLE TOOLS
+===============================
+
+Integrate or simulate:
+
+* Forms Builder
+* Sheets-like tables
+* Presentation Builder
+* Rich Text Docs Editor
+* Notes System
+* Whiteboard
+
+Features:
+
+* Live collaboration
+* Auto save
+* Real-time editing
+* Commenting
+* Mention users
+* Share permissions
+* Export as PDF
+
+========================================
+4. PROJECT MANAGEMENT SYSTEM
+============================
+
+Features:
+
+* Create projects
+* Assign team members
+* Create tasks
+* Kanban Board
+* Timeline View
+* Gantt Chart
+* Task priorities
+* Deadlines
+* Progress tracking
+* Subtasks
+* Comments
+* Attachments
+* Time tracking
+
+========================================
+5. HR MANAGEMENT PANEL
+======================
+
+Features:
+
+* Employee Directory
+* Attendance
+* Leave Requests
+* Payroll Overview
+* Employee Documents
+* Performance Tracking
+* Joining & Exit Management
+* Department Management
+* Holiday Calendar
+
+========================================
+6. TEAM COMMUNICATION SYSTEM
+============================
+
+Features:
+
+* Team chat
+* Direct messages
+* Channels
+* File sharing
+* Voice/video meeting links
+* Message reactions
+* Thread replies
+* Notifications
+
+========================================
+7. ADMIN CONTROL PANEL
+======================
+
+Admin can:
+
+* Manage all users
+* Add/remove employees
+* Assign roles
+* Manage permissions
+* Monitor activity logs
+* View analytics
+* Manage storage
+* Manage departments
+* Block users
+* Reset passwords
+* Audit system usage
+* Broadcast announcements
+
+========================================
+8. ANALYTICS & REPORTING
+========================
+
+Analytics Dashboard:
+
+* Employee productivity
+* Task completion
+* Attendance reports
+* File usage
+* Team performance
+* Login activity
+* Storage analytics
+* Department analytics
+
+Export:
+
+* CSV
+* Excel
+* PDF
+
+========================================
+9. NOTIFICATION SYSTEM
+======================
+
+Notifications:
+
+* Email notifications
+* In-app notifications
+* Push notifications
+* Slack-style alerts
+* Mention alerts
+* Deadline reminders
+
+========================================
+10. SEARCH SYSTEM
+=================
+
+Global Search:
+
+* Search employees
+* Search files
+* Search projects
+* Search chats
+* Search tasks
+* AI-powered suggestions
+
+========================================
+11. AI FEATURES
+===============
+
+Integrate AI assistant for:
+
+* Summarizing documents
+* Generating meeting notes
+* Smart search
+* Auto task generation
+* AI chatbot for company help
+* AI analytics insights
+
+========================================
+12. SECURITY FEATURES
+=====================
+
+* End-to-end secure authentication
+* Encrypted passwords
+* Two-factor authentication
+* Secure API validation
+* Rate limiting
+* File permission system
+* Audit logs
+* IP/device monitoring
+* Admin security alerts
+
+========================================
+13. UI/UX DESIGN REQUIREMENTS
+=============================
+
+Design should be:
+
+* Modern
+* Premium
+* Minimal
+* Fast
+* Clean
+* Mobile responsive
+* Dark/Light mode
+* Animated transitions
+* Dashboard-style interface
+
+Pages:
+
+* Login Page
+* Dashboard
+* Workspace
+* Projects
+* HR Panel
+* Admin Panel
+* Chat
+* File Manager
+* Analytics
+* Settings
+
+========================================
+14. DATABASE DESIGN
+===================
+
+Create complete scalable database schema for:
+
+* Users
+* Roles
+* Permissions
+* Teams
+* Departments
+* Projects
+* Tasks
+* Files
+* Messages
+* Notifications
+* Attendance
+* Leave requests
+* Activity logs
+* AI history
+
+========================================
+15. API REQUIREMENTS
+====================
+
+Create REST APIs for:
+
+* Authentication
+* Users
+* Projects
+* Tasks
+* Files
+* Chat
+* Notifications
+* Analytics
+* HR operations
+
+Include:
+
+* Validation
+* Pagination
+* Filtering
+* Rate limiting
+* Error handling
+* Swagger documentation
+
+========================================
+16. PERFORMANCE REQUIREMENTS
+============================
+
+* Optimized queries
+* Lazy loading
+* CDN support
+* Caching
+* Image optimization
+* Infinite scrolling
+* Scalable architecture
+
+========================================
+17. FUTURE SCALABILITY
+======================
+
+System should support:
+
+* Multiple companies
+* Multi-tenant architecture
+* SaaS subscription plans
+* Team billing
+* Plugin marketplace
+* Third-party integrations
+
+========================================
+18. THIRD-PARTY INTEGRATIONS
+============================
+
+Integrate:
+
+* Google Drive
+* Google Calendar
+* Zoom
+* Slack
+* Microsoft Office
+* Dropbox
+* Gmail
+* WhatsApp API
+
+========================================
+19. DELIVERABLES
+================
+
+Generate:
+
+* Full frontend architecture
+* Backend architecture
+* Folder structure
+* Database schema
+* API structure
+* Authentication flow
+* UI wireframes
+* Admin workflow
+* Role permission system
+* Deployment guide
+* DevOps setup
+* CI/CD pipeline
+* Production security checklist
+
+========================================
+20. BONUS FEATURES
+==================
+
+* Employee social feed
+* Internal company wiki
+* Company knowledge base
+* Polls & surveys
+* Event management
+* Asset management
+* Visitor management
+* QR attendance
+* Digital signatures
+* Workflow automation
+
+========================================
+FINAL OUTPUT EXPECTATION
+========================
+
+Build this as a production-ready enterprise-grade platform with:
+
+* Clean architecture
+* Reusable components
+* Modular backend
+* Enterprise security
+* Excellent UX
+* Fully scalable infrastructure
+* Detailed documentation
+* Professional UI design
+* Real-world business usability
+
+The output should include:
+
+1. System Architecture
+2. Complete Database Design
+3. Frontend + Backend Folder Structure
+4. API Design
+5. Authentication Flow
+6. Admin Panel Design
+7. Employee Workspace Design
+8. Deployment Instructions
+9. Security Best Practices
+10. Future Scaling Strategy
