@@ -30,4 +30,8 @@ export interface UserInput {
   linkedinUrl?: string | null;
   /** @nullable */
   bio?: string | null;
+  /** @nullable */
+  birthday?: Date | null;
+  /** @nullable */
+  workAnniversary?: Date | null;
 }

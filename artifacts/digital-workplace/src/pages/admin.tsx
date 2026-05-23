@@ -44,6 +44,8 @@ const createEmployeeSchema = z.object({
   role: z.string().default("employee"),
   jobTitle: z.string().optional(),
   departmentId: z.number().optional(),
+  birthday: z.string().optional(),
+  workAnniversary: z.string().optional(),
 });
 
 type CreateEmployeeForm = z.infer<typeof createEmployeeSchema>;
@@ -55,6 +57,8 @@ const editEmployeeSchema = z.object({
   role: z.string(),
   jobTitle: z.string().optional(),
   departmentId: z.number().optional(),
+  birthday: z.string().optional(),
+  workAnniversary: z.string().optional(),
   status: z.string(),
 });
 
@@ -75,7 +79,7 @@ function CreateEmployeeDialog({ departments }: { departments: any[] }) {
 
   const form = useForm<CreateEmployeeForm>({
     resolver: zodResolver(createEmployeeSchema),
-    defaultValues: { firstName: "", lastName: "", email: "", role: "employee", jobTitle: "" },
+    defaultValues: { firstName: "", lastName: "", email: "", role: "employee", jobTitle: "", birthday: "", workAnniversary: "" },
   });
 
   const onSubmit = (data: CreateEmployeeForm) => {
@@ -83,6 +87,8 @@ function CreateEmployeeDialog({ departments }: { departments: any[] }) {
     if (!payload.jobTitle) delete payload.jobTitle;
     if (!payload.departmentId) delete payload.departmentId;
     if (!payload.password) delete payload.password;
+    if (!payload.birthday) delete payload.birthday;
+    if (!payload.workAnniversary) delete payload.workAnniversary;
     createUser.mutate({ data: payload }, {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getListUsersQueryKey() });
@@ -204,6 +210,24 @@ function CreateEmployeeDialog({ departments }: { departments: any[] }) {
                 </FormControl>
               </FormItem>
             )} />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField control={form.control} name="birthday" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Birthday</FormLabel>
+                  <FormControl>
+                    <Input type="date" data-testid="input-birthday" {...field} />
+                  </FormControl>
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="workAnniversary" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Work Anniversary</FormLabel>
+                  <FormControl>
+                    <Input type="date" data-testid="input-anniversary" {...field} />
+                  </FormControl>
+                </FormItem>
+              )} />
+            </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={createUser.isPending} data-testid="submit-create-employee">
@@ -232,6 +256,8 @@ function EditEmployeeDialog({ user, departments }: { user: any; departments: any
       role: user.role ?? "employee",
       jobTitle: user.jobTitle ?? "",
       departmentId: user.departmentId ?? undefined,
+      birthday: user.birthday ?? "",
+      workAnniversary: user.workAnniversary ?? "",
       status: user.status ?? "active",
     },
   });
@@ -240,6 +266,8 @@ function EditEmployeeDialog({ user, departments }: { user: any; departments: any
     const payload: any = { ...data };
     if (!payload.jobTitle) payload.jobTitle = null;
     if (!payload.departmentId) delete payload.departmentId;
+    payload.birthday = payload.birthday ? payload.birthday : null;
+    payload.workAnniversary = payload.workAnniversary ? payload.workAnniversary : null;
     updateUser.mutate({ id: user.id, data: payload }, {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getListUsersQueryKey() });
@@ -300,6 +328,24 @@ function EditEmployeeDialog({ user, departments }: { user: any; departments: any
                 </FormControl>
               </FormItem>
             )} />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField control={form.control} name="birthday" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Birthday</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} value={field.value ?? ""} data-testid={`edit-birthday-${user.id}`} />
+                  </FormControl>
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="workAnniversary" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Work Anniversary</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} value={field.value ?? ""} data-testid={`edit-anniversary-${user.id}`} />
+                  </FormControl>
+                </FormItem>
+              )} />
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <FormField control={form.control} name="role" render={({ field }) => (
                 <FormItem>

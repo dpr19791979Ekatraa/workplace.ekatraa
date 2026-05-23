@@ -24,5 +24,9 @@ export interface UserUpdate {
   linkedinUrl?: string | null;
   /** @nullable */
   bio?: string | null;
+  /** @nullable */
+  birthday?: Date | null;
+  /** @nullable */
+  workAnniversary?: Date | null;
   status?: UserUpdateStatus;
 }

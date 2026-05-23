@@ -27,6 +27,7 @@ const profileSchema = z.object({
   avatarUrl: z.string().optional(),
   linkedinUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   bio: z.string().max(500, "Bio must be 500 characters or less").optional(),
+  birthday: z.string().optional(),
 });
 
 type ProfileForm = z.infer<typeof profileSchema>;
@@ -51,11 +52,14 @@ export default function SettingsPage() {
       avatarUrl: (currentUser as any)?.avatarUrl ?? "",
       linkedinUrl: (currentUser as any)?.linkedinUrl ?? "",
       bio: (currentUser as any)?.bio ?? "",
+      birthday: (currentUser as any)?.birthday ?? "",
     },
   });
 
   const onSubmit = (data: ProfileForm) => {
-    updateUser.mutate({ data: data as any }, {
+    const payload: any = { ...data };
+    payload.birthday = payload.birthday ? payload.birthday : null;
+    updateUser.mutate({ data: payload }, {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
         toast({ title: "Profile updated" });
@@ -142,6 +146,14 @@ export default function SettingsPage() {
                     <FormLabel>Phone</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g. +1 555 000 0000" data-testid="input-phone" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="birthday" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Birthday</FormLabel>
+                    <FormControl>
+                      <Input type="date" data-testid="input-birthday" {...field} value={field.value ?? ""} />
                     </FormControl>
                   </FormItem>
                 )} />

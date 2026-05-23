@@ -25,6 +25,20 @@ import {
 
 const router: IRouter = Router();
 
+// Workaround: generated Zod uses `coerce.date().nullish()` for date fields,
+// which turns explicit `null` into 1970-01-01. Re-derive date strings from the
+// raw body so users can actually clear birthday / workAnniversary.
+function normalizeDateFields(parsed: any, raw: any): any {
+  const out: any = { ...parsed };
+  for (const key of ["birthday", "workAnniversary"] as const) {
+    if (raw && key in raw) {
+      const v = raw[key];
+      out[key] = v && typeof v === "string" && v.length > 0 ? v : null;
+    }
+  }
+  return out;
+}
+
 async function formatUser(user: typeof usersTable.$inferSelect) {
   let departmentName: string | null = null;
   if (user.departmentId) {
@@ -74,7 +88,8 @@ router.post("/users", requireAuth, requireRole(["super_admin", "admin", "hr_mana
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const { password, ...userData } = parsed.data as any;
+  const { password, ...rest } = parsed.data as any;
+  const userData = normalizeDateFields(rest, req.body);
   if (userData.role === "super_admin" && (userData.email ?? "").toLowerCase() !== OWNER_EMAIL) {
     res.status(403).json({ error: "Only the owner account can be super admin." });
     return;
@@ -124,7 +139,8 @@ router.patch("/users/me", requireAuth, async (req, res): Promise<void> => {
     return;
   }
   const user = (req as any).currentUser;
-  const [updated] = await db.update(usersTable).set(parsed.data).where(eq(usersTable.id, user.id)).returning();
+  const data = normalizeDateFields(parsed.data, req.body);
+  const [updated] = await db.update(usersTable).set(data).where(eq(usersTable.id, user.id)).returning();
   res.json(await formatUser(updated));
 });
 
@@ -165,7 +181,8 @@ router.patch("/users/:id", requireAuth, requireRole(["super_admin", "admin", "hr
     res.status(403).json({ error: "Owner account role cannot be changed." });
     return;
   }
-  const [updated] = await db.update(usersTable).set(parsed.data).where(eq(usersTable.id, id)).returning();
+  const data = normalizeDateFields(parsed.data, req.body);
+  const [updated] = await db.update(usersTable).set(data).where(eq(usersTable.id, id)).returning();
   res.json(await formatUser(updated));
 });
 

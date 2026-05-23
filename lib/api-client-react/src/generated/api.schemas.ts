@@ -55,6 +55,10 @@ export interface User {
   linkedinUrl?: string | null;
   /** @nullable */
   bio?: string | null;
+  /** @nullable */
+  birthday?: string | null;
+  /** @nullable */
+  workAnniversary?: string | null;
   status: UserStatus;
   createdAt: string;
   /** @nullable */
@@ -103,6 +107,10 @@ export interface UserInput {
   linkedinUrl?: string | null;
   /** @nullable */
   bio?: string | null;
+  /** @nullable */
+  birthday?: string | null;
+  /** @nullable */
+  workAnniversary?: string | null;
 }
 
 export type UserUpdateRole = typeof UserUpdateRole[keyof typeof UserUpdateRole];
@@ -142,6 +150,10 @@ export interface UserUpdate {
   linkedinUrl?: string | null;
   /** @nullable */
   bio?: string | null;
+  /** @nullable */
+  birthday?: string | null;
+  /** @nullable */
+  workAnniversary?: string | null;
   status?: UserUpdateStatus;
 }
 

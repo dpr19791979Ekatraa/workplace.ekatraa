@@ -974,6 +974,12 @@ components:
           type: ["string", "null"]
         bio:
           type: ["string", "null"]
+        birthday:
+          type: ["string", "null"]
+          format: date
+        workAnniversary:
+          type: ["string", "null"]
+          format: date
         status:
           type: string
           enum: [active, inactive, blocked]
@@ -1029,6 +1035,12 @@ components:
           type: ["string", "null"]
         bio:
           type: ["string", "null"]
+        birthday:
+          type: ["string", "null"]
+          format: date
+        workAnniversary:
+          type: ["string", "null"]
+          format: date
 
     UserUpdate:
       type: object
@@ -1052,6 +1064,12 @@ components:
           type: ["string", "null"]
         bio:
           type: ["string", "null"]
+        birthday:
+          type: ["string", "null"]
+          format: date
+        workAnniversary:
+          type: ["string", "null"]
+          format: date
         status:
           type: string
           enum: [active, inactive, blocked]

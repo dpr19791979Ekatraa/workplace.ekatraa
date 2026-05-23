@@ -29,6 +29,10 @@ export interface User {
   linkedinUrl?: string | null;
   /** @nullable */
   bio?: string | null;
+  /** @nullable */
+  birthday?: Date | null;
+  /** @nullable */
+  workAnniversary?: Date | null;
   status: UserStatus;
   createdAt: Date;
   /** @nullable */

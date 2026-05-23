@@ -23,10 +23,23 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Clock, Plus, Megaphone, Trash2 } from "lucide-react";
+import { Check, X, Clock, Plus, Megaphone, Trash2, Cake, Award } from "lucide-react";
 import PayslipsTab from "@/components/payslips-tab";
 import EmailEmployeeDialog from "@/components/email-employee-dialog";
 import DispatchPayslipDialog from "@/components/dispatch-payslip-dialog";
+
+function formatMonthDay(d: string): string {
+  const [, m, day] = d.split("-");
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${months[parseInt(m, 10) - 1]} ${parseInt(day, 10)}`;
+}
+
+function formatAnniversary(d: string): string {
+  const [y, m, day] = d.split("-");
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const years = new Date().getFullYear() - parseInt(y, 10);
+  return `${months[parseInt(m, 10) - 1]} ${parseInt(day, 10)} · ${years}y`;
+}
 
 const leaveStatusColors: Record<string, string> = {
   pending: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
@@ -342,31 +355,51 @@ export default function HRPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {((employees as any)?.users ?? []).map((emp: any) => (
                   <Card key={emp.id} data-testid={`employee-card-${emp.id}`}>
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <Avatar className="w-10 h-10">
-                        <AvatarImage src={emp.avatarUrl} />
-                        <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                          {emp.firstName?.[0]}{emp.lastName?.[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">{emp.firstName} {emp.lastName}</p>
-                        <p className="text-xs text-muted-foreground truncate">{emp.jobTitle ?? emp.role?.replace(/_/g, " ")}</p>
-                        {emp.departmentName && (
-                          <p className="text-xs text-muted-foreground">{emp.departmentName}</p>
-                        )}
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-10 h-10">
+                          <AvatarImage src={emp.avatarUrl} />
+                          <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                            {emp.firstName?.[0]}{emp.lastName?.[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground">{emp.firstName} {emp.lastName}</p>
+                          <p className="text-xs text-muted-foreground truncate">{emp.jobTitle ?? emp.role?.replace(/_/g, " ")}</p>
+                          {emp.departmentName && (
+                            <p className="text-xs text-muted-foreground">{emp.departmentName}</p>
+                          )}
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className={`text-xs flex-shrink-0 ${emp.status === "active" ? "border-emerald-200 text-emerald-600" : "border-slate-200 text-slate-500"}`}
+                        >
+                          {emp.status}
+                        </Badge>
                       </div>
-                      <Badge
-                        variant="outline"
-                        className={`text-xs flex-shrink-0 ${emp.status === "active" ? "border-emerald-200 text-emerald-600" : "border-slate-200 text-slate-500"}`}
-                      >
-                        {emp.status}
-                      </Badge>
-                      <EmailEmployeeDialog
-                        email={emp.email}
-                        name={`${emp.firstName ?? ""} ${emp.lastName ?? ""}`.trim()}
-                      />
-                      {isHR && <DispatchPayslipDialog employee={emp} />}
+                      {(emp.birthday || emp.workAnniversary) && (
+                        <div className="flex flex-wrap gap-2 text-[11px]">
+                          {emp.birthday && (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-pink-50 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300" data-testid={`birthday-${emp.id}`}>
+                              <Cake className="w-3 h-3" />
+                              {formatMonthDay(emp.birthday)}
+                            </span>
+                          )}
+                          {emp.workAnniversary && (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300" data-testid={`anniversary-${emp.id}`}>
+                              <Award className="w-3 h-3" />
+                              {formatAnniversary(emp.workAnniversary)}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <div className="flex justify-end gap-1">
+                        <EmailEmployeeDialog
+                          email={emp.email}
+                          name={`${emp.firstName ?? ""} ${emp.lastName ?? ""}`.trim()}
+                        />
+                        {isHR && <DispatchPayslipDialog employee={emp} />}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
