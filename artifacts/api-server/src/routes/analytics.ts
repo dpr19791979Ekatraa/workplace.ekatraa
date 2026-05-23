@@ -9,12 +9,24 @@ import { GetActivityFeedQueryParams, GetProductivityAnalyticsQueryParams } from 
 
 const router: IRouter = Router();
 
-router.get("/analytics/dashboard", requireAuth, async (_req, res): Promise<void> => {
+router.get("/analytics/dashboard", requireAuth, async (req, res): Promise<void> => {
+  const currentUser = (req as any).currentUser;
+  const isHR = ["super_admin", "admin", "hr_manager"].includes(currentUser.role);
+  const isManager = ["super_admin", "admin", "hr_manager", "manager", "team_leader"].includes(currentUser.role);
+
   const [{ totalEmployees }] = await db.select({ totalEmployees: sql<number>`count(*)::int` }).from(usersTable).where(eq(usersTable.status, "active"));
   const [{ activeProjects }] = await db.select({ activeProjects: sql<number>`count(*)::int` }).from(projectsTable).where(eq(projectsTable.status, "active"));
-  const [{ pendingTasks }] = await db.select({ pendingTasks: sql<number>`count(*)::int` }).from(tasksTable).where(sql`${tasksTable.status} not in ('done')`);
+  const [{ pendingTasks }] = await db.select({ pendingTasks: sql<number>`count(*)::int` })
+    .from(tasksTable)
+    .where(isManager
+      ? sql`${tasksTable.status} not in ('done')`
+      : and(sql`${tasksTable.status} not in ('done')`, eq(tasksTable.assigneeId, currentUser.id))!);
   const [{ documentsUploaded }] = await db.select({ documentsUploaded: sql<number>`count(*)::int` }).from(documentsTable);
-  const [{ pendingLeaves }] = await db.select({ pendingLeaves: sql<number>`count(*)::int` }).from(leavesTable).where(eq(leavesTable.status, "pending"));
+  const [{ pendingLeaves }] = await db.select({ pendingLeaves: sql<number>`count(*)::int` })
+    .from(leavesTable)
+    .where(isHR
+      ? eq(leavesTable.status, "pending")
+      : and(eq(leavesTable.status, "pending"), eq(leavesTable.userId, currentUser.id))!);
 
   const today = new Date().toISOString().split("T")[0];
   const [{ presentToday }] = await db.select({ presentToday: sql<number>`count(*)::int` }).from(attendanceTable).where(eq(attendanceTable.date, today));

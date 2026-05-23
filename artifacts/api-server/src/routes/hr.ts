@@ -143,8 +143,14 @@ router.get("/leaves", requireAuth, async (req, res): Promise<void> => {
     return;
   }
   const { userId, status } = parsed.data;
+  const currentUser = (req as any).currentUser;
+  const isHR = ["super_admin", "admin", "hr_manager"].includes(currentUser.role);
   const conditions: SQL[] = [];
-  if (userId) conditions.push(eq(leavesTable.userId, userId));
+  if (!isHR) {
+    conditions.push(eq(leavesTable.userId, currentUser.id));
+  } else if (userId) {
+    conditions.push(eq(leavesTable.userId, userId));
+  }
   if (status) conditions.push(eq(leavesTable.status, status));
 
   const leaves = await db.select().from(leavesTable)
