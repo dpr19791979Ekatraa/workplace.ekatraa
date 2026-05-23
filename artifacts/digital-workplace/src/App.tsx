@@ -164,13 +164,13 @@ function ClerkProviderWithRoutes() {
         signIn: {
           start: {
             title: "Welcome back",
-            subtitle: "Sign in to your WorkSpace account",
+            subtitle: "Sign in to your ekatraa account",
           },
         },
         signUp: {
           start: {
             title: "Create account",
-            subtitle: "Start using WorkSpace today",
+            subtitle: "Start using ekatraa today",
           },
         },
       }}

@@ -1,4 +1,4 @@
-# WorkSpace
+# ekatraa
 
 An enterprise digital workplace platform that unifies documents, project/task tracking, HR management, analytics, and team collaboration in one intranet app.
 

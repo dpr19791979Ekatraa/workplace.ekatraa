@@ -9,10 +9,7 @@ export default function LandingPage() {
       <nav className="border-b border-border bg-background/95 backdrop-blur sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-lg tracking-tight">WorkSpace</span>
+            <img src="/logo.svg" className="h-10 w-auto" alt="ekatraa" />
           </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" asChild data-testid="sign-in-link">
@@ -35,7 +32,7 @@ export default function LandingPage() {
           Your team's command center
         </h1>
         <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          WorkSpace brings together documents, projects, tasks, HR management, and analytics into one unified platform. Built for teams that want to move fast.
+          ekatraa brings together documents, projects, tasks, HR management, and analytics into one unified platform. Built for teams that want to move fast.
         </p>
         <div className="mt-10 flex items-center justify-center gap-4">
           <Button size="lg" asChild data-testid="hero-get-started">
