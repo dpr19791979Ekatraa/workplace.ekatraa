@@ -32,9 +32,13 @@ router.get("/analytics/dashboard", requireAuth, async (req, res): Promise<void> 
   const [{ presentToday }] = await db.select({ presentToday: sql<number>`count(*)::int` }).from(attendanceTable).where(eq(attendanceTable.date, today));
 
   const tasksByStatusRaw = await db.select({ status: tasksTable.status, count: sql<number>`count(*)::int` })
-    .from(tasksTable).groupBy(tasksTable.status);
+    .from(tasksTable)
+    .where(isManager ? undefined : eq(tasksTable.assigneeId, currentUser.id))
+    .groupBy(tasksTable.status);
   const projectsByStatusRaw = await db.select({ status: projectsTable.status, count: sql<number>`count(*)::int` })
-    .from(projectsTable).groupBy(projectsTable.status);
+    .from(projectsTable)
+    .where(isManager ? undefined : eq(projectsTable.ownerId, currentUser.id))
+    .groupBy(projectsTable.status);
 
   const recentHiresRaw = await db.select().from(usersTable)
     .orderBy(desc(usersTable.createdAt)).limit(4);
@@ -144,23 +148,39 @@ router.get("/analytics/productivity", requireAuth, async (req, res): Promise<voi
     return;
   }
   const { period = "month" } = parsed.data;
+  const currentUser = (req as any).currentUser;
+  const isManager = ["super_admin", "admin", "hr_manager", "manager", "team_leader"].includes(currentUser.role);
 
-  const [{ total }] = await db.select({ total: sql<number>`count(*)::int` }).from(tasksTable);
-  const [{ done }] = await db.select({ done: sql<number>`count(*)::int` }).from(tasksTable).where(eq(tasksTable.status, "done"));
+  const [{ total }] = await db.select({ total: sql<number>`count(*)::int` })
+    .from(tasksTable)
+    .where(isManager ? undefined : eq(tasksTable.assigneeId, currentUser.id));
+  const [{ done }] = await db.select({ done: sql<number>`count(*)::int` })
+    .from(tasksTable)
+    .where(isManager
+      ? eq(tasksTable.status, "done")
+      : and(eq(tasksTable.status, "done"), eq(tasksTable.assigneeId, currentUser.id))!);
   const taskCompletionRate = total > 0 ? Math.round((done / total) * 100) : 0;
 
   const days = period === "week" ? 7 : period === "month" ? 30 : 90;
   const avgTasksPerDay = Math.round((done / days) * 10) / 10;
 
-  const topPerformersRaw = await db.select({
-    assigneeId: tasksTable.assigneeId,
-    completedTasks: sql<number>`count(*)::int`,
-  })
-    .from(tasksTable)
-    .where(eq(tasksTable.status, "done"))
-    .groupBy(tasksTable.assigneeId)
-    .orderBy(desc(sql`count(*)`))
-    .limit(5);
+  const topPerformersRaw = isManager
+    ? await db.select({
+        assigneeId: tasksTable.assigneeId,
+        completedTasks: sql<number>`count(*)::int`,
+      })
+        .from(tasksTable)
+        .where(eq(tasksTable.status, "done"))
+        .groupBy(tasksTable.assigneeId)
+        .orderBy(desc(sql`count(*)`))
+        .limit(5)
+    : await db.select({
+        assigneeId: tasksTable.assigneeId,
+        completedTasks: sql<number>`count(*)::int`,
+      })
+        .from(tasksTable)
+        .where(and(eq(tasksTable.status, "done"), eq(tasksTable.assigneeId, currentUser.id))!)
+        .groupBy(tasksTable.assigneeId);
 
   const topPerformers = await Promise.all(topPerformersRaw.map(async p => {
     if (!p.assigneeId) return null;

@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
-  useGetDashboardAnalytics, useGetProductivityAnalytics,
+  useGetDashboardAnalytics, useGetProductivityAnalytics, useGetCurrentUser,
   getGetDashboardAnalyticsQueryKey, getGetProductivityAnalyticsQueryKey,
 } from "@workspace/api-client-react";
 import {
@@ -18,6 +18,9 @@ const COLORS = ["#6366f1", "#38bdf8", "#34d399", "#f59e0b", "#f43f5e"];
 
 export default function AnalyticsPage() {
   const [period, setPeriod] = useState<"week" | "month" | "quarter">("month");
+
+  const { data: currentUser } = useGetCurrentUser();
+  const isManager = currentUser?.role && ["super_admin", "admin", "hr_manager", "manager", "team_leader"].includes(currentUser.role);
 
   const { data: dashboard, isLoading: dashLoading } = useGetDashboardAnalytics({
     query: { queryKey: getGetDashboardAnalyticsQueryKey() }
@@ -33,7 +36,7 @@ export default function AnalyticsPage() {
   const topPerformers = ((productivity as any)?.topPerformers ?? []) as any[];
 
   return (
-    <Layout title="Analytics">
+    <Layout title={isManager ? "Analytics" : "My Analytics"}>
       <div className="p-6 max-w-7xl mx-auto space-y-6">
         {/* KPI strip */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -44,7 +47,7 @@ export default function AnalyticsPage() {
                   {(productivity as any)?.taskCompletionRate ?? 0}%
                 </p>
               )}
-              <p className="text-sm text-muted-foreground mt-1">Task Completion Rate</p>
+              <p className="text-sm text-muted-foreground mt-1">{isManager ? "Task Completion Rate" : "My Completion Rate"}</p>
             </CardContent>
           </Card>
           <Card>
@@ -54,7 +57,7 @@ export default function AnalyticsPage() {
                   {(productivity as any)?.avgTasksPerDay ?? 0}
                 </p>
               )}
-              <p className="text-sm text-muted-foreground mt-1">Avg Tasks/Day</p>
+              <p className="text-sm text-muted-foreground mt-1">{isManager ? "Avg Tasks/Day" : "My Avg Tasks/Day"}</p>
             </CardContent>
           </Card>
           <Card className="col-span-2 lg:col-span-1">
@@ -73,7 +76,7 @@ export default function AnalyticsPage() {
           {/* Tasks by status */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold">Tasks by Status</CardTitle>
+              <CardTitle className="text-sm font-semibold">{isManager ? "Tasks by Status" : "My Tasks by Status"}</CardTitle>
             </CardHeader>
             <CardContent>
               {dashLoading ? <Skeleton className="h-48 w-full" /> : (
@@ -100,7 +103,7 @@ export default function AnalyticsPage() {
           {/* Projects by status */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold">Projects by Status</CardTitle>
+              <CardTitle className="text-sm font-semibold">{isManager ? "Projects by Status" : "My Projects by Status"}</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center justify-center">
               {dashLoading ? <Skeleton className="h-48 w-48 rounded-full" /> : (
@@ -185,7 +188,8 @@ export default function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          {/* Top performers */}
+          {/* Top performers (managers only) */}
+          {isManager && (
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold">Top Performers</CardTitle>
@@ -220,6 +224,7 @@ export default function AnalyticsPage() {
               )}
             </CardContent>
           </Card>
+          )}
         </div>
       </div>
     </Layout>
