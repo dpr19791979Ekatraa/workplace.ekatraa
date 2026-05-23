@@ -95,7 +95,7 @@ export default function Layout({ children, title }: LayoutProps) {
         `}
       >
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-4 py-5 border-b border-sidebar-border text-[#000000]">
+        <div className="flex gap-2.5 px-4 py-5 border-b border-sidebar-border text-[#000000] justify-center items-center border-t-[#000000] border-r-[#000000] border-b-[#000000] border-l-[#000000]">
           <img src="/logo.png" className="h-16 w-auto" alt="ekatraa" />
           <Button
             variant="ghost"
