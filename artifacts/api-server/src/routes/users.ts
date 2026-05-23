@@ -66,6 +66,8 @@ router.get("/users", requireAuth, async (req, res): Promise<void> => {
   res.json({ users: formatted, total: count, page, limit });
 });
 
+const OWNER_EMAIL = (process.env.OWNER_EMAIL ?? "durgaprasad.rath@ekatraa.in").toLowerCase();
+
 router.post("/users", requireAuth, requireRole(["super_admin", "admin", "hr_manager"]), async (req, res): Promise<void> => {
   const parsed = CreateUserBody.safeParse(req.body);
   if (!parsed.success) {
@@ -73,6 +75,10 @@ router.post("/users", requireAuth, requireRole(["super_admin", "admin", "hr_mana
     return;
   }
   const { password, ...userData } = parsed.data as any;
+  if (userData.role === "super_admin" && (userData.email ?? "").toLowerCase() !== OWNER_EMAIL) {
+    res.status(403).json({ error: "Only the owner account can be super admin." });
+    return;
+  }
   let clerkId = `local_${Date.now()}`;
   if (password) {
     try {
@@ -144,11 +150,22 @@ router.patch("/users/:id", requireAuth, requireRole(["super_admin", "admin", "hr
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [updated] = await db.update(usersTable).set(parsed.data).where(eq(usersTable.id, id)).returning();
-  if (!updated) {
+  const [target] = await db.select().from(usersTable).where(eq(usersTable.id, id)).limit(1);
+  if (!target) {
     res.status(404).json({ error: "User not found" });
     return;
   }
+  const newRole = (parsed.data as any).role;
+  const isOwnerRow = target.email.toLowerCase() === OWNER_EMAIL;
+  if (newRole === "super_admin" && !isOwnerRow) {
+    res.status(403).json({ error: "Only the owner account can be super admin." });
+    return;
+  }
+  if (target.role === "super_admin" && isOwnerRow && newRole && newRole !== "super_admin") {
+    res.status(403).json({ error: "Owner account role cannot be changed." });
+    return;
+  }
+  const [updated] = await db.update(usersTable).set(parsed.data).where(eq(usersTable.id, id)).returning();
   res.json(await formatUser(updated));
 });
 
