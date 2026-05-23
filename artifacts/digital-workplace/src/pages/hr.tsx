@@ -25,6 +25,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Check, X, Clock, Plus, Megaphone, Trash2 } from "lucide-react";
 import PayslipsTab from "@/components/payslips-tab";
+import EmailEmployeeDialog from "@/components/email-employee-dialog";
 
 const leaveStatusColors: Record<string, string> = {
   pending: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
@@ -360,6 +361,10 @@ export default function HRPage() {
                       >
                         {emp.status}
                       </Badge>
+                      <EmailEmployeeDialog
+                        email={emp.email}
+                        name={`${emp.firstName ?? ""} ${emp.lastName ?? ""}`.trim()}
+                      />
                     </CardContent>
                   </Card>
                 ))}
