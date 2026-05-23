@@ -148,6 +148,15 @@ router.delete("/users/:id", requireAuth, requireRole(["super_admin", "admin"]), 
     return;
   }
   try {
+    const [target] = await db.select().from(usersTable).where(eq(usersTable.id, params.data.id));
+    if (!target) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+    if (target.role === "super_admin") {
+      res.status(403).json({ error: "Super admin accounts cannot be deleted." });
+      return;
+    }
     await db.delete(usersTable).where(eq(usersTable.id, params.data.id));
     res.sendStatus(204);
   } catch (err: any) {

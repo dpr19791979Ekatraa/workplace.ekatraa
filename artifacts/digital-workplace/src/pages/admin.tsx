@@ -537,7 +537,7 @@ export default function AdminPage() {
                           {isSuperAdmin && (
                             <EditEmployeeDialog user={user} departments={(departments as any[]) ?? []} />
                           )}
-                          {isSuperAdmin && user.id !== currentUser?.id && (
+                          {isSuperAdmin && user.id !== currentUser?.id && user.role !== "super_admin" && (
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button
