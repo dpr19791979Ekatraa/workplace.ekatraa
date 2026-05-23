@@ -53,7 +53,8 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     }
   }
 
-  if (user.email === "durgaprasad.rath@ekatraa.in" && user.role !== "super_admin") {
+  const ownerEmail = (process.env.OWNER_EMAIL ?? "durgaprasad.rath@ekatraa.in").toLowerCase();
+  if (user.email.toLowerCase() === ownerEmail && user.role !== "super_admin") {
     [user] = await db.update(usersTable).set({ role: "super_admin" }).where(eq(usersTable.id, user.id)).returning();
     req.log.info({ userId: user.id }, "Auto-promoted owner to super_admin");
   }

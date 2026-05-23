@@ -1,6 +1,17 @@
 import { Router, type IRouter } from "express";
 import { eq, ilike, and, type SQL, sql } from "drizzle-orm";
-import { db, usersTable, departmentsTable } from "@workspace/db";
+import {
+  db,
+  usersTable,
+  departmentsTable,
+  activityLogTable,
+  announcementsTable,
+  attendanceTable,
+  leavesTable,
+  projectsTable,
+  tasksTable,
+  documentsTable,
+} from "@workspace/db";
 import { requireAuth, requireRole } from "../lib/auth";
 import { clerkClient } from "@clerk/express";
 import {
@@ -157,7 +168,23 @@ router.delete("/users/:id", requireAuth, requireRole(["super_admin", "admin"]), 
       res.status(403).json({ error: "Super admin accounts cannot be deleted." });
       return;
     }
-    await db.delete(usersTable).where(eq(usersTable.id, params.data.id));
+    const uid = params.data.id;
+    await db.transaction(async (tx) => {
+      await tx.delete(activityLogTable).where(eq(activityLogTable.actorId, uid));
+      await tx.delete(announcementsTable).where(eq(announcementsTable.authorId, uid));
+      await tx.delete(attendanceTable).where(eq(attendanceTable.userId, uid));
+      await tx.delete(leavesTable).where(eq(leavesTable.userId, uid));
+      await tx.update(leavesTable).set({ reviewedById: null }).where(eq(leavesTable.reviewedById, uid));
+      await tx.update(projectsTable).set({ ownerId: null }).where(eq(projectsTable.ownerId, uid));
+      await tx.update(tasksTable).set({ assigneeId: null }).where(eq(tasksTable.assigneeId, uid));
+      await tx.update(documentsTable).set({ uploadedById: null }).where(eq(documentsTable.uploadedById, uid));
+      await tx.delete(usersTable).where(eq(usersTable.id, uid));
+    });
+    if (target.clerkId && !target.clerkId.startsWith("demo_user_") && !target.clerkId.startsWith("local_")) {
+      await clerkClient.users.deleteUser(target.clerkId).catch((err) => {
+        req.log.warn({ err, clerkId: target.clerkId }, "DB user deleted but Clerk user removal failed");
+      });
+    }
     res.sendStatus(204);
   } catch (err: any) {
     if (err?.code === "23503") {
