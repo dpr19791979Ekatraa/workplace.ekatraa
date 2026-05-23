@@ -7,10 +7,191 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useListTasks, useUpdateTask, useDeleteTask, getListTasksQueryKey } from "@workspace/api-client-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  useListTasks, useCreateTask, useUpdateTask, useDeleteTask,
+  useListProjects, useListUsers,
+  getListTasksQueryKey,
+} from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { CheckSquare, Trash2 } from "lucide-react";
+import { CheckSquare, Trash2, Plus } from "lucide-react";
+
+const createTaskSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  status: z.string().default("todo"),
+  priority: z.string().default("medium"),
+  projectId: z.number().optional(),
+  assigneeId: z.number().optional(),
+  dueDate: z.string().optional(),
+});
+
+type CreateTaskForm = z.infer<typeof createTaskSchema>;
+
+function CreateTaskDialog() {
+  const [open, setOpen] = useState(false);
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const createTask = useCreateTask();
+
+  const { data: projects } = useListProjects({});
+  const { data: usersData } = useListUsers({});
+
+  const form = useForm<CreateTaskForm>({
+    resolver: zodResolver(createTaskSchema),
+    defaultValues: { title: "", description: "", status: "todo", priority: "medium" },
+  });
+
+  const onSubmit = (data: CreateTaskForm) => {
+    const payload: any = { ...data };
+    if (!payload.description) delete payload.description;
+    if (!payload.projectId) delete payload.projectId;
+    if (!payload.assigneeId) delete payload.assigneeId;
+    if (!payload.dueDate) delete payload.dueDate;
+    createTask.mutate({ data: payload }, {
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: getListTasksQueryKey() });
+        toast({ title: "Task created" });
+        setOpen(false);
+        form.reset();
+      },
+      onError: () => toast({ title: "Failed to create task", variant: "destructive" }),
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button data-testid="create-task-button">
+          <Plus className="w-4 h-4 mr-2" /> New Task
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create Task</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField control={form.control} name="title" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title</FormLabel>
+                <FormControl>
+                  <Input placeholder="Task title" data-testid="input-task-title" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="description" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Optional description" rows={3} {...field} />
+                </FormControl>
+              </FormItem>
+            )} />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField control={form.control} name="status" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="backlog">Backlog</SelectItem>
+                      <SelectItem value="todo">To Do</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="in_review">In Review</SelectItem>
+                      <SelectItem value="done">Done</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="priority" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Priority</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="critical">Critical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField control={form.control} name="projectId" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project</FormLabel>
+                  <Select
+                    value={field.value ? String(field.value) : "none"}
+                    onValueChange={v => field.onChange(v !== "none" ? Number(v) : undefined)}
+                  >
+                    <FormControl>
+                      <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {((projects as any[]) ?? []).map((p: any) => (
+                        <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="assigneeId" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Assignee</FormLabel>
+                  <Select
+                    value={field.value ? String(field.value) : "none"}
+                    onValueChange={v => field.onChange(v !== "none" ? Number(v) : undefined)}
+                  >
+                    <FormControl>
+                      <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">Unassigned</SelectItem>
+                      {(((usersData as any)?.users ?? []) as any[]).map((u: any) => (
+                        <SelectItem key={u.id} value={String(u.id)}>
+                          {u.firstName} {u.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )} />
+            </div>
+            <FormField control={form.control} name="dueDate" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Due Date</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+              </FormItem>
+            )} />
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={createTask.isPending} data-testid="submit-create-task">
+                {createTask.isPending ? "Creating..." : "Create Task"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 const statusColors: Record<string, string> = {
   backlog: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
@@ -91,6 +272,9 @@ export default function TasksPage() {
               <SelectItem value="critical">Critical</SelectItem>
             </SelectContent>
           </Select>
+          <div className="sm:ml-auto">
+            <CreateTaskDialog />
+          </div>
         </div>
 
         {isLoading ? (

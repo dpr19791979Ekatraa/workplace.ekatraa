@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  useListUsers, useUpdateUser, useDeleteUser, useListDepartments,
+  useListUsers, useCreateUser, useUpdateUser, useDeleteUser, useListDepartments,
   useCreateDepartment, useDeleteDepartment, useGetCurrentUser,
   getListUsersQueryKey, getListDepartmentsQueryKey,
 } from "@workspace/api-client-react";
@@ -32,12 +32,150 @@ const roleColors: Record<string, string> = {
   guest: "bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400",
 };
 
+const createEmployeeSchema = z.object({
+  firstName: z.string().min(1, "First name required"),
+  lastName: z.string().min(1, "Last name required"),
+  email: z.string().email("Valid email required"),
+  role: z.string().default("employee"),
+  jobTitle: z.string().optional(),
+  departmentId: z.number().optional(),
+});
+
+type CreateEmployeeForm = z.infer<typeof createEmployeeSchema>;
+
 const createDeptSchema = z.object({
   name: z.string().min(1, "Name required"),
   description: z.string().optional(),
 });
 
 type CreateDeptForm = z.infer<typeof createDeptSchema>;
+
+function CreateEmployeeDialog({ departments }: { departments: any[] }) {
+  const [open, setOpen] = useState(false);
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const createUser = useCreateUser();
+
+  const form = useForm<CreateEmployeeForm>({
+    resolver: zodResolver(createEmployeeSchema),
+    defaultValues: { firstName: "", lastName: "", email: "", role: "employee", jobTitle: "" },
+  });
+
+  const onSubmit = (data: CreateEmployeeForm) => {
+    const payload: any = { ...data };
+    if (!payload.jobTitle) delete payload.jobTitle;
+    if (!payload.departmentId) delete payload.departmentId;
+    createUser.mutate({ data: payload }, {
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: getListUsersQueryKey() });
+        toast({ title: "Employee added" });
+        setOpen(false);
+        form.reset();
+      },
+      onError: () => toast({ title: "Failed to add employee", variant: "destructive" }),
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" data-testid="create-employee-button">
+          <Plus className="w-4 h-4 mr-1" /> Add Employee
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Employee</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField control={form.control} name="firstName" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="First name" data-testid="input-first-name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="lastName" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Last name" data-testid="input-last-name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+            <FormField control={form.control} name="email" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input type="email" placeholder="employee@company.com" data-testid="input-email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField control={form.control} name="role" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-employee-role"><SelectValue /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="employee">Employee</SelectItem>
+                      <SelectItem value="team_leader">Team Leader</SelectItem>
+                      <SelectItem value="hr_manager">HR Manager</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="departmentId" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Department</FormLabel>
+                  <Select
+                    value={field.value ? String(field.value) : "none"}
+                    onValueChange={v => field.onChange(v !== "none" ? Number(v) : undefined)}
+                  >
+                    <FormControl>
+                      <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {departments.map((d: any) => (
+                        <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )} />
+            </div>
+            <FormField control={form.control} name="jobTitle" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Job Title</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. Senior Engineer" {...field} />
+                </FormControl>
+              </FormItem>
+            )} />
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={createUser.isPending} data-testid="submit-create-employee">
+                {createUser.isPending ? "Adding..." : "Add Employee"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function CreateDepartmentDialog() {
   const [open, setOpen] = useState(false);
@@ -162,15 +300,18 @@ export default function AdminPage() {
 
           {/* Users tab */}
           <TabsContent value="users" className="mt-4 space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search users..."
-                className="pl-9"
-                value={userSearch}
-                onChange={e => setUserSearch(e.target.value)}
-                data-testid="search-users"
-              />
+            <div className="flex gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search users..."
+                  className="pl-9"
+                  value={userSearch}
+                  onChange={e => setUserSearch(e.target.value)}
+                  data-testid="search-users"
+                />
+              </div>
+              <CreateEmployeeDialog departments={(departments as any[]) ?? []} />
             </div>
 
             {usersLoading ? (
