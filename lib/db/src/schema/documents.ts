@@ -8,6 +8,7 @@ export const documentsTable = pgTable("documents", {
   name: text("name").notNull(),
   type: text("type").notNull().default("other"),
   objectPath: text("object_path"),
+  url: text("url"),
   size: integer("size"),
   folderId: integer("folder_id"),
   departmentId: integer("department_id").references(() => departmentsTable.id),

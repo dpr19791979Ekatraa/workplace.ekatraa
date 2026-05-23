@@ -1312,6 +1312,8 @@ components:
           enum: [pdf, docx, xlsx, pptx, image, video, zip, other]
         objectPath:
           type: ["string", "null"]
+        url:
+          type: ["string", "null"]
         size:
           type: ["integer", "null"]
         folderId:
@@ -1344,6 +1346,8 @@ components:
           type: string
           enum: [pdf, docx, xlsx, pptx, image, video, zip, other]
         objectPath:
+          type: ["string", "null"]
+        url:
           type: ["string", "null"]
         size:
           type: ["integer", "null"]

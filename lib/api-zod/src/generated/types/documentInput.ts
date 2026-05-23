@@ -13,6 +13,8 @@ export interface DocumentInput {
   /** @nullable */
   objectPath?: string | null;
   /** @nullable */
+  url?: string | null;
+  /** @nullable */
   size?: number | null;
   /** @nullable */
   folderId?: number | null;

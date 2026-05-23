@@ -14,11 +14,25 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
   useListDocuments, useCreateDocument, useDeleteDocument, useToggleDocumentStar,
-  useGetRecentDocuments, getListDocumentsQueryKey, getGetRecentDocumentsQueryKey,
+  useGetRecentDocuments, useRequestUploadUrl,
+  getListDocumentsQueryKey, getGetRecentDocumentsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Search, Star, Trash2, Plus, Upload, File, FileImage, FileVideo, FileSpreadsheet, Archive } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileText, Search, Star, Trash2, Plus, Upload, File, FileImage, FileVideo, FileSpreadsheet, Archive, Link as LinkIcon, ExternalLink, Download } from "lucide-react";
+
+function detectTypeFromName(name: string): string {
+  const ext = name.split(".").pop()?.toLowerCase() ?? "";
+  if (ext === "pdf") return "pdf";
+  if (["doc", "docx"].includes(ext)) return "docx";
+  if (["xls", "xlsx", "csv"].includes(ext)) return "xlsx";
+  if (["ppt", "pptx"].includes(ext)) return "pptx";
+  if (["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext)) return "image";
+  if (["mp4", "mov", "webm", "avi", "mkv"].includes(ext)) return "video";
+  if (["zip", "rar", "7z", "tar", "gz"].includes(ext)) return "zip";
+  return "other";
+}
 
 function fileTypeIcon(type: string) {
   switch (type) {
@@ -39,41 +53,79 @@ function formatSize(bytes: number | null) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-const createDocumentSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  type: z.string().default("other"),
-  description: z.string().optional(),
-  objectPath: z.string().optional(),
-});
-
-type CreateDocumentForm = z.infer<typeof createDocumentSchema>;
-
 function CreateDocumentDialog() {
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<"file" | "link">("file");
+  const [file, setFile] = useState<File | null>(null);
+  const [name, setName] = useState("");
+  const [url, setUrl] = useState("");
+  const [description, setDescription] = useState("");
+  const [uploading, setUploading] = useState(false);
   const qc = useQueryClient();
   const { toast } = useToast();
   const createDocument = useCreateDocument();
+  const requestUploadUrl = useRequestUploadUrl();
 
-  const form = useForm<CreateDocumentForm>({
-    resolver: zodResolver(createDocumentSchema),
-    defaultValues: { name: "", type: "other", description: "" },
-  });
+  const reset = () => {
+    setFile(null); setName(""); setUrl(""); setDescription("");
+    setMode("file"); setUploading(false);
+  };
 
-  const onSubmit = (data: CreateDocumentForm) => {
-    createDocument.mutate({ data: data as any }, {
-      onSuccess: () => {
-        qc.invalidateQueries({ queryKey: getListDocumentsQueryKey() });
-        qc.invalidateQueries({ queryKey: getGetRecentDocumentsQueryKey() });
-        toast({ title: "Document created" });
-        setOpen(false);
-        form.reset();
-      },
-      onError: () => toast({ title: "Failed to create document", variant: "destructive" }),
-    });
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: getListDocumentsQueryKey() });
+    qc.invalidateQueries({ queryKey: getGetRecentDocumentsQueryKey() });
+  };
+
+  const handleSubmit = async () => {
+    try {
+      if (mode === "file") {
+        if (!file) { toast({ title: "Please choose a file", variant: "destructive" }); return; }
+        setUploading(true);
+        const presign = await requestUploadUrl.mutateAsync({
+          data: { name: file.name, size: file.size, contentType: file.type || "application/octet-stream" } as any,
+        });
+        const { uploadURL, objectPath } = presign as any;
+        const putRes = await fetch(uploadURL, {
+          method: "PUT",
+          headers: { "Content-Type": file.type || "application/octet-stream" },
+          body: file,
+        });
+        if (!putRes.ok) throw new Error("Upload failed");
+        await createDocument.mutateAsync({
+          data: {
+            name: name.trim() || file.name,
+            type: detectTypeFromName(file.name),
+            objectPath,
+            size: file.size,
+            description: description.trim() || null,
+          } as any,
+        });
+        toast({ title: "File uploaded" });
+      } else {
+        if (!url.trim()) { toast({ title: "Please paste a link", variant: "destructive" }); return; }
+        try { new URL(url.trim()); } catch { toast({ title: "Invalid URL", variant: "destructive" }); return; }
+        await createDocument.mutateAsync({
+          data: {
+            name: name.trim() || url.trim(),
+            type: "other",
+            url: url.trim(),
+            description: description.trim() || null,
+          } as any,
+        });
+        toast({ title: "Link added" });
+      }
+      refresh();
+      reset();
+      setOpen(false);
+    } catch (err: any) {
+      toast({ title: "Failed to add document", description: err?.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
       <DialogTrigger asChild>
         <Button data-testid="create-document-button">
           <Plus className="w-4 h-4 mr-2" /> Add Document
@@ -83,48 +135,73 @@ function CreateDocumentDialog() {
         <DialogHeader>
           <DialogTitle>Add Document</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField control={form.control} name="name" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Document name" data-testid="input-document-name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="type" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Type</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {["pdf", "docx", "xlsx", "pptx", "image", "video", "zip", "other"].map(t => (
-                      <SelectItem key={t} value={t}>{t.toUpperCase()}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )} />
-            <FormField control={form.control} name="description" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Optional description" {...field} />
-                </FormControl>
-              </FormItem>
-            )} />
-            <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={createDocument.isPending} data-testid="submit-create-document">
-                {createDocument.isPending ? "Adding..." : "Add Document"}
-              </Button>
+        <Tabs value={mode} onValueChange={(v) => setMode(v as "file" | "link")}>
+          <TabsList className="grid grid-cols-2 w-full">
+            <TabsTrigger value="file"><Upload className="w-4 h-4 mr-2" /> Upload File</TabsTrigger>
+            <TabsTrigger value="link"><LinkIcon className="w-4 h-4 mr-2" /> External Link</TabsTrigger>
+          </TabsList>
+          <TabsContent value="file" className="space-y-4 pt-4">
+            <div>
+              <label className="text-sm font-medium block mb-2">File</label>
+              <Input
+                type="file"
+                onChange={(e) => {
+                  const f = e.target.files?.[0] ?? null;
+                  setFile(f);
+                  if (f && !name) setName(f.name);
+                }}
+                data-testid="input-document-file"
+              />
+              {file && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {file.name} — {formatSize(file.size)}
+                </p>
+              )}
             </div>
-          </form>
-        </Form>
+          </TabsContent>
+          <TabsContent value="link" className="space-y-4 pt-4">
+            <div>
+              <label className="text-sm font-medium block mb-2">URL</label>
+              <Input
+                type="url"
+                placeholder="https://drive.google.com/... or https://notion.so/..."
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                data-testid="input-document-url"
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-medium block mb-2">Name {mode === "link" && <span className="text-muted-foreground font-normal">(optional)</span>}</label>
+            <Input
+              placeholder={mode === "file" ? "Display name" : "Link title"}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              data-testid="input-document-name"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium block mb-2">Description</label>
+            <Textarea
+              placeholder="Optional description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={uploading || createDocument.isPending || requestUploadUrl.isPending}
+            data-testid="submit-create-document"
+          >
+            {uploading ? "Uploading..." : mode === "file" ? "Upload" : "Add Link"}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -220,22 +297,55 @@ export default function DocumentsPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {((documents as any[]) ?? []).map((doc: any) => (
+            {((documents as any[]) ?? []).map((doc: any) => {
+              const openHref = doc.url ?? (doc.objectPath ? `/api/storage${doc.objectPath}` : null);
+              const isLink = !!doc.url;
+              return (
               <Card key={doc.id} data-testid={`document-row-${doc.id}`}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
-                    <div className="flex-shrink-0">{fileTypeIcon(doc.type)}</div>
+                    <div className="flex-shrink-0">{isLink ? <LinkIcon className="w-5 h-5 text-sky-500" /> : fileTypeIcon(doc.type)}</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{doc.name}</p>
+                      {openHref ? (
+                        <a
+                          href={openHref}
+                          target={isLink ? "_blank" : undefined}
+                          rel={isLink ? "noopener noreferrer" : undefined}
+                          download={!isLink ? doc.name : undefined}
+                          className="text-sm font-medium text-foreground truncate hover:text-primary hover:underline block"
+                          data-testid={`open-document-${doc.id}`}
+                        >
+                          {doc.name}
+                        </a>
+                      ) : (
+                        <p className="text-sm font-medium text-foreground truncate">{doc.name}</p>
+                      )}
                       <div className="flex items-center gap-2 mt-0.5">
-                        <Badge variant="outline" className="text-xs">{doc.type.toUpperCase()}</Badge>
-                        <span className="text-xs text-muted-foreground">{formatSize(doc.size)}</span>
+                        <Badge variant="outline" className="text-xs">{isLink ? "LINK" : doc.type.toUpperCase()}</Badge>
+                        {!isLink && <span className="text-xs text-muted-foreground">{formatSize(doc.size)}</span>}
                         {doc.uploaderName && (
                           <span className="text-xs text-muted-foreground hidden sm:block">by {doc.uploaderName}</span>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
+                      {openHref && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground"
+                          asChild
+                        >
+                          <a
+                            href={openHref}
+                            target={isLink ? "_blank" : undefined}
+                            rel={isLink ? "noopener noreferrer" : undefined}
+                            download={!isLink ? doc.name : undefined}
+                          >
+                            {isLink ? <ExternalLink className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+                          </a>
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -258,7 +368,8 @@ export default function DocumentsPage() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
