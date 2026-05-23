@@ -40,6 +40,7 @@ const createEmployeeSchema = z.object({
   firstName: z.string().min(1, "First name required"),
   lastName: z.string().min(1, "Last name required"),
   email: z.string().email("Valid email required"),
+  password: z.string().min(8, "Password must be at least 8 characters").optional().or(z.literal("")),
   role: z.string().default("employee"),
   jobTitle: z.string().optional(),
   departmentId: z.number().optional(),
@@ -81,14 +82,21 @@ function CreateEmployeeDialog({ departments }: { departments: any[] }) {
     const payload: any = { ...data };
     if (!payload.jobTitle) delete payload.jobTitle;
     if (!payload.departmentId) delete payload.departmentId;
+    if (!payload.password) delete payload.password;
     createUser.mutate({ data: payload }, {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getListUsersQueryKey() });
-        toast({ title: "Employee added" });
+        toast({
+          title: "Employee added",
+          description: payload.password ? `${payload.email} can now sign in with the password you set.` : "Profile created without login access.",
+        });
         setOpen(false);
         form.reset();
       },
-      onError: () => toast({ title: "Failed to add employee", variant: "destructive" }),
+      onError: (err: any) => {
+        const msg = err?.response?.data?.error ?? "Failed to add employee";
+        toast({ title: msg, variant: "destructive" });
+      },
     });
   };
 
@@ -130,6 +138,22 @@ function CreateEmployeeDialog({ departments }: { departments: any[] }) {
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input type="email" placeholder="employee@company.com" data-testid="input-email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="password" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password <span className="text-xs text-muted-foreground font-normal">(min 8 chars — leave blank for profile only)</span></FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Set a password the employee will use to sign in"
+                    data-testid="input-password"
+                    autoComplete="new-password"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

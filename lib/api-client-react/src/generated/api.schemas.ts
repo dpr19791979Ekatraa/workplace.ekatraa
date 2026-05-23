@@ -78,6 +78,12 @@ export const UserInputRole = {
 
 export interface UserInput {
   email: string;
+  /**
+     * If provided, a Clerk account is created so the employee can sign in with email + this password.
+     * @minLength 8
+     * @nullable
+     */
+  password?: string | null;
   firstName: string;
   lastName: string;
   role: UserInputRole;

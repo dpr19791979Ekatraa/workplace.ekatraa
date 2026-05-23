@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, ilike, and, type SQL, sql } from "drizzle-orm";
 import { db, usersTable, departmentsTable } from "@workspace/db";
 import { requireAuth, requireRole } from "../lib/auth";
+import { clerkClient } from "@clerk/express";
 import {
   ListUsersQueryParams,
   CreateUserBody,
@@ -60,11 +61,38 @@ router.post("/users", requireAuth, requireRole(["super_admin", "admin", "hr_mana
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [user] = await db.insert(usersTable).values({
-    ...parsed.data,
-    clerkId: `local_${Date.now()}`,
-  }).returning();
-  res.status(201).json(await formatUser(user));
+  const { password, ...userData } = parsed.data as any;
+  let clerkId = `local_${Date.now()}`;
+  if (password) {
+    try {
+      const clerkUser = await clerkClient.users.createUser({
+        emailAddress: [userData.email],
+        password,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        skipPasswordChecks: false,
+      });
+      clerkId = clerkUser.id;
+    } catch (err: any) {
+      req.log.error({ err }, "Failed to create Clerk user");
+      const msg = err?.errors?.[0]?.longMessage ?? err?.errors?.[0]?.message ?? err?.message ?? "Failed to create login account";
+      res.status(400).json({ error: msg });
+      return;
+    }
+  }
+  try {
+    const [user] = await db.insert(usersTable).values({ ...userData, clerkId }).returning();
+    res.status(201).json(await formatUser(user));
+  } catch (err: any) {
+    if (clerkId && !clerkId.startsWith("local_")) {
+      await clerkClient.users.deleteUser(clerkId).catch(() => {});
+    }
+    if (err?.code === "23505") {
+      res.status(409).json({ error: "An employee with this email already exists." });
+      return;
+    }
+    throw err;
+  }
 });
 
 router.get("/users/me", requireAuth, async (req, res): Promise<void> => {

@@ -56,8 +56,13 @@ export const ListUsersResponse = zod.object({
 /**
  * @summary Create a new user
  */
+export const createUserBodyPasswordMin = 8;
+
+
+
 export const CreateUserBody = zod.object({
   "email": zod.string().email(),
+  "password": zod.string().min(createUserBodyPasswordMin).nullish().describe('If provided, a Clerk account is created so the employee can sign in with email + this password.'),
   "firstName": zod.string(),
   "lastName": zod.string(),
   "role": zod.enum(['super_admin', 'admin', 'hr_manager', 'team_leader', 'employee', 'guest']),
