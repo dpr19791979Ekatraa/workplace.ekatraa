@@ -22,6 +22,8 @@ export const usersTable = pgTable("users", {
   jobTitle: text("job_title"),
   avatarUrl: text("avatar_url"),
   phone: text("phone"),
+  linkedinUrl: text("linkedin_url"),
+  bio: text("bio"),
   status: text("status").notNull().default("active"),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

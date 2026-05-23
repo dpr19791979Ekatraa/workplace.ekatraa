@@ -25,6 +25,10 @@ export interface User {
   avatarUrl?: string | null;
   /** @nullable */
   phone?: string | null;
+  /** @nullable */
+  linkedinUrl?: string | null;
+  /** @nullable */
+  bio?: string | null;
   status: UserStatus;
   createdAt: Date;
   /** @nullable */

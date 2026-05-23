@@ -51,6 +51,10 @@ export interface User {
   avatarUrl?: string | null;
   /** @nullable */
   phone?: string | null;
+  /** @nullable */
+  linkedinUrl?: string | null;
+  /** @nullable */
+  bio?: string | null;
   status: UserStatus;
   createdAt: string;
   /** @nullable */
@@ -95,6 +99,10 @@ export interface UserInput {
   phone?: string | null;
   /** @nullable */
   avatarUrl?: string | null;
+  /** @nullable */
+  linkedinUrl?: string | null;
+  /** @nullable */
+  bio?: string | null;
 }
 
 export type UserUpdateRole = typeof UserUpdateRole[keyof typeof UserUpdateRole];
@@ -130,6 +138,10 @@ export interface UserUpdate {
   phone?: string | null;
   /** @nullable */
   avatarUrl?: string | null;
+  /** @nullable */
+  linkedinUrl?: string | null;
+  /** @nullable */
+  bio?: string | null;
   status?: UserUpdateStatus;
 }
 

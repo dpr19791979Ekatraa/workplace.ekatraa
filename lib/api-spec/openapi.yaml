@@ -970,6 +970,10 @@ components:
           type: ["string", "null"]
         phone:
           type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
         status:
           type: string
           enum: [active, inactive, blocked]
@@ -1021,6 +1025,10 @@ components:
           type: ["string", "null"]
         avatarUrl:
           type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
 
     UserUpdate:
       type: object
@@ -1039,6 +1047,10 @@ components:
         phone:
           type: ["string", "null"]
         avatarUrl:
+          type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        bio:
           type: ["string", "null"]
         status:
           type: string

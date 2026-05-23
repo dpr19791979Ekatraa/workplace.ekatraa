@@ -43,6 +43,8 @@ export const ListUsersResponse = zod.object({
   "jobTitle": zod.string().nullish(),
   "avatarUrl": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "bio": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']),
   "createdAt": zod.coerce.date(),
   "lastLoginAt": zod.coerce.date().nullish()
@@ -69,7 +71,9 @@ export const CreateUserBody = zod.object({
   "departmentId": zod.number().nullish(),
   "jobTitle": zod.string().nullish(),
   "phone": zod.string().nullish(),
-  "avatarUrl": zod.string().nullish()
+  "avatarUrl": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "bio": zod.string().nullish()
 })
 
 
@@ -88,6 +92,8 @@ export const GetCurrentUserResponse = zod.object({
   "jobTitle": zod.string().nullish(),
   "avatarUrl": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "bio": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']),
   "createdAt": zod.coerce.date(),
   "lastLoginAt": zod.coerce.date().nullish()
@@ -105,6 +111,8 @@ export const UpdateCurrentUserBody = zod.object({
   "jobTitle": zod.string().nullish(),
   "phone": zod.string().nullish(),
   "avatarUrl": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "bio": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']).optional()
 })
 
@@ -120,6 +128,8 @@ export const UpdateCurrentUserResponse = zod.object({
   "jobTitle": zod.string().nullish(),
   "avatarUrl": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "bio": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']),
   "createdAt": zod.coerce.date(),
   "lastLoginAt": zod.coerce.date().nullish()
@@ -145,6 +155,8 @@ export const GetUserResponse = zod.object({
   "jobTitle": zod.string().nullish(),
   "avatarUrl": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "bio": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']),
   "createdAt": zod.coerce.date(),
   "lastLoginAt": zod.coerce.date().nullish()
@@ -166,6 +178,8 @@ export const UpdateUserBody = zod.object({
   "jobTitle": zod.string().nullish(),
   "phone": zod.string().nullish(),
   "avatarUrl": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "bio": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']).optional()
 })
 
@@ -181,6 +195,8 @@ export const UpdateUserResponse = zod.object({
   "jobTitle": zod.string().nullish(),
   "avatarUrl": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "bio": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']),
   "createdAt": zod.coerce.date(),
   "lastLoginAt": zod.coerce.date().nullish()
@@ -901,6 +917,8 @@ export const GetDashboardAnalyticsResponse = zod.object({
   "jobTitle": zod.string().nullish(),
   "avatarUrl": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "bio": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']),
   "createdAt": zod.coerce.date(),
   "lastLoginAt": zod.coerce.date().nullish()

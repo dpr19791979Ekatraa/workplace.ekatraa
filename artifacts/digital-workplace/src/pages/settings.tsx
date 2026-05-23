@@ -2,6 +2,7 @@ import Layout from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -24,6 +25,8 @@ const profileSchema = z.object({
   jobTitle: z.string().optional(),
   phone: z.string().optional(),
   avatarUrl: z.string().optional(),
+  linkedinUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  bio: z.string().max(500, "Bio must be 500 characters or less").optional(),
 });
 
 type ProfileForm = z.infer<typeof profileSchema>;
@@ -46,6 +49,8 @@ export default function SettingsPage() {
       jobTitle: (currentUser as any)?.jobTitle ?? "",
       phone: (currentUser as any)?.phone ?? "",
       avatarUrl: (currentUser as any)?.avatarUrl ?? "",
+      linkedinUrl: (currentUser as any)?.linkedinUrl ?? "",
+      bio: (currentUser as any)?.bio ?? "",
     },
   });
 
@@ -146,6 +151,24 @@ export default function SettingsPage() {
                     <FormControl>
                       <Input placeholder="https://..." data-testid="input-avatar-url" {...field} />
                     </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="linkedinUrl" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>LinkedIn Profile</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://linkedin.com/in/your-handle" data-testid="input-linkedin-url" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="bio" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bio</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="A short bio about yourself..." rows={4} data-testid="input-bio" {...field} />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )} />
                 <div className="flex justify-end">

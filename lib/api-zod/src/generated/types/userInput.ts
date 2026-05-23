@@ -26,4 +26,8 @@ export interface UserInput {
   phone?: string | null;
   /** @nullable */
   avatarUrl?: string | null;
+  /** @nullable */
+  linkedinUrl?: string | null;
+  /** @nullable */
+  bio?: string | null;
 }
