@@ -68,6 +68,9 @@ router.delete("/departments/:id", requireAuth, requireRole(["super_admin", "admi
     res.status(400).json({ error: params.error.message });
     return;
   }
+  await db.update(usersTable)
+    .set({ departmentId: null })
+    .where(eq(usersTable.departmentId, params.data.id));
   await db.delete(departmentsTable).where(eq(departmentsTable.id, params.data.id));
   res.sendStatus(204);
 });
