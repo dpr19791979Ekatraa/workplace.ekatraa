@@ -11,6 +11,7 @@ import hrRouter from "./hr";
 import analyticsRouter from "./analytics";
 import meetingsRouter from "./meetings";
 import notificationsRouter from "./notifications";
+import chatRouter from "./chat";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(hrRouter);
 router.use(analyticsRouter);
 router.use(meetingsRouter);
 router.use(notificationsRouter);
+router.use(chatRouter);
 
 export default router;

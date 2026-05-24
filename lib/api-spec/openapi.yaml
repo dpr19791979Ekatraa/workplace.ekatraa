@@ -1025,6 +1025,116 @@ paths:
         "204":
           description: Marked
 
+  # ── Chat ─────────────────────────────────────────────────────────────────
+  /conversations:
+    get:
+      operationId: listConversations
+      tags: [chat]
+      summary: List current user's conversations
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+
+  /conversations/direct:
+    post:
+      operationId: openDirectConversation
+      tags: [chat]
+      summary: Find or create a 1-on-1 conversation with another user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DirectConversationInput"
+      responses:
+        "200":
+          description: Conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+
+  /conversations/group:
+    post:
+      operationId: createGroupConversation
+      tags: [chat]
+      summary: Create a group conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GroupConversationInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+
+  /conversations/{id}/messages:
+    get:
+      operationId: listMessages
+      tags: [chat]
+      summary: List messages in a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessage"
+    post:
+      operationId: sendMessage
+      tags: [chat]
+      summary: Send a message
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatMessageInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+
+  /conversations/{id}/read:
+    post:
+      operationId: markConversationRead
+      tags: [chat]
+      summary: Mark conversation as read up to now
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Marked
+
 components:
   schemas:
     HealthStatus:
@@ -1896,3 +2006,71 @@ components:
             $ref: "#/components/schemas/Notification"
         unreadCount:
           type: integer
+
+    # ── Chat ───────────────────────────────────────────────────────────────
+    ConversationMember:
+      type: object
+      required: [id, firstName, lastName]
+      properties:
+        id: { type: integer }
+        firstName: { type: string }
+        lastName: { type: string }
+        avatarUrl: { type: ["string", "null"] }
+        jobTitle: { type: ["string", "null"] }
+
+    Conversation:
+      type: object
+      required: [id, kind, members, unreadCount, createdAt]
+      properties:
+        id: { type: integer }
+        kind:
+          type: string
+          enum: [direct, group]
+        name: { type: ["string", "null"] }
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConversationMember"
+        lastMessage:
+          oneOf:
+            - $ref: "#/components/schemas/ChatMessage"
+            - type: "null"
+        unreadCount: { type: integer }
+        createdAt:
+          type: string
+          format: date-time
+
+    ChatMessage:
+      type: object
+      required: [id, conversationId, senderId, body, createdAt]
+      properties:
+        id: { type: integer }
+        conversationId: { type: integer }
+        senderId: { type: integer }
+        senderName: { type: ["string", "null"] }
+        body: { type: string }
+        createdAt:
+          type: string
+          format: date-time
+
+    ChatMessageInput:
+      type: object
+      required: [body]
+      properties:
+        body: { type: string, minLength: 1, maxLength: 4000 }
+
+    DirectConversationInput:
+      type: object
+      required: [userId]
+      properties:
+        userId: { type: integer }
+
+    GroupConversationInput:
+      type: object
+      required: [name, memberIds]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 80 }
+        memberIds:
+          type: array
+          items: { type: integer }
+          minItems: 1

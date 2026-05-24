@@ -1153,3 +1153,118 @@ export const MarkNotificationReadParams = zod.object({
 })
 
 
+/**
+ * @summary List current user's conversations
+ */
+export const ListConversationsResponseItem = zod.object({
+  "id": zod.number(),
+  "kind": zod.enum(['direct', 'group']),
+  "name": zod.string().nullish(),
+  "members": zod.array(zod.object({
+  "id": zod.number(),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "avatarUrl": zod.string().nullish(),
+  "jobTitle": zod.string().nullish()
+})),
+  "lastMessage": zod.union([zod.object({
+  "id": zod.number(),
+  "conversationId": zod.number(),
+  "senderId": zod.number(),
+  "senderName": zod.string().nullish(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date()
+}),zod.null()]).optional(),
+  "unreadCount": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+export const ListConversationsResponse = zod.array(ListConversationsResponseItem)
+
+
+/**
+ * @summary Find or create a 1-on-1 conversation with another user
+ */
+export const OpenDirectConversationBody = zod.object({
+  "userId": zod.number()
+})
+
+export const OpenDirectConversationResponse = zod.object({
+  "id": zod.number(),
+  "kind": zod.enum(['direct', 'group']),
+  "name": zod.string().nullish(),
+  "members": zod.array(zod.object({
+  "id": zod.number(),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "avatarUrl": zod.string().nullish(),
+  "jobTitle": zod.string().nullish()
+})),
+  "lastMessage": zod.union([zod.object({
+  "id": zod.number(),
+  "conversationId": zod.number(),
+  "senderId": zod.number(),
+  "senderName": zod.string().nullish(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date()
+}),zod.null()]).optional(),
+  "unreadCount": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Create a group conversation
+ */
+export const createGroupConversationBodyNameMax = 80;
+
+
+
+
+export const CreateGroupConversationBody = zod.object({
+  "name": zod.string().min(1).max(createGroupConversationBodyNameMax),
+  "memberIds": zod.array(zod.number()).min(1)
+})
+
+
+/**
+ * @summary List messages in a conversation
+ */
+export const ListMessagesParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ListMessagesResponseItem = zod.object({
+  "id": zod.number(),
+  "conversationId": zod.number(),
+  "senderId": zod.number(),
+  "senderName": zod.string().nullish(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+export const ListMessagesResponse = zod.array(ListMessagesResponseItem)
+
+
+/**
+ * @summary Send a message
+ */
+export const SendMessageParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const sendMessageBodyBodyMax = 4000;
+
+
+
+export const SendMessageBody = zod.object({
+  "body": zod.string().min(1).max(sendMessageBodyBodyMax)
+})
+
+
+/**
+ * @summary Mark conversation as read up to now
+ */
+export const MarkConversationReadParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+

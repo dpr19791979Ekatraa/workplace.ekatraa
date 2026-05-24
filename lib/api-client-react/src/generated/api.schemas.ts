@@ -835,6 +835,67 @@ export interface NotificationList {
   unreadCount: number;
 }
 
+export interface ConversationMember {
+  id: number;
+  firstName: string;
+  lastName: string;
+  /** @nullable */
+  avatarUrl?: string | null;
+  /** @nullable */
+  jobTitle?: string | null;
+}
+
+export type ConversationKind = typeof ConversationKind[keyof typeof ConversationKind];
+
+
+export const ConversationKind = {
+  direct: 'direct',
+  group: 'group',
+} as const;
+
+export interface ChatMessage {
+  id: number;
+  conversationId: number;
+  senderId: number;
+  /** @nullable */
+  senderName?: string | null;
+  body: string;
+  createdAt: string;
+}
+
+export interface Conversation {
+  id: number;
+  kind: ConversationKind;
+  /** @nullable */
+  name?: string | null;
+  members: ConversationMember[];
+  lastMessage?: ChatMessage | null;
+  unreadCount: number;
+  createdAt: string;
+}
+
+export interface ChatMessageInput {
+  /**
+     * @minLength 1
+     * @maxLength 4000
+     */
+  body: string;
+}
+
+export interface DirectConversationInput {
+  userId: number;
+}
+
+export interface GroupConversationInput {
+  /**
+     * @minLength 1
+     * @maxLength 80
+     */
+  name: string;
+  /** @minItems 1 */
+  memberIds: number[];
+}
+
 export type ListUsersParams = {
 department?: string;
 role?: string;
