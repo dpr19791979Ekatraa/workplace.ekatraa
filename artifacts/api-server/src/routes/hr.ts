@@ -11,6 +11,7 @@ import {
   UpdateLeaveStatusBody,
 } from "@workspace/api-zod";
 import { logActivity } from "../lib/activity";
+import { notifyUsers } from "../lib/notifications";
 
 const router: IRouter = Router();
 
@@ -201,6 +202,13 @@ router.patch("/leaves/:id/status", requireAuth, requireRole(["super_admin", "adm
     res.status(404).json({ error: "Leave not found" });
     return;
   }
+  const verb = updated.status === "approved" ? "approved" : updated.status === "rejected" ? "rejected" : "updated";
+  await notifyUsers([updated.userId], {
+    type: `leave_${updated.status}`,
+    title: `Leave ${verb}`,
+    body: `Your ${updated.type} leave request was ${verb}`,
+    link: "/hr",
+  });
   res.json(await formatLeave(updated));
 });
 

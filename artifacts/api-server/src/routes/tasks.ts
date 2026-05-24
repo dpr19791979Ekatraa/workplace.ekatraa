@@ -11,6 +11,7 @@ import {
   DeleteTaskParams,
 } from "@workspace/api-zod";
 import { logActivity } from "../lib/activity";
+import { notifyUsers } from "../lib/notifications";
 
 const router: IRouter = Router();
 
@@ -76,6 +77,15 @@ router.post("/tasks", requireAuth, async (req, res): Promise<void> => {
     estimatedHours: parsed.data.estimatedHours != null ? String(parsed.data.estimatedHours) : null,
   }).returning();
   await logActivity(user.id, "task_created", `Created task "${task.title}"`, task.id, "task");
+  if (task.assigneeId && task.assigneeId !== user.id) {
+    const actor = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Someone";
+    await notifyUsers([task.assigneeId], {
+      type: "task_assigned",
+      title: `New task: ${task.title}`,
+      body: `${actor} assigned you a task`,
+      link: "/tasks",
+    });
+  }
   res.status(201).json(await formatTask(task));
 });
 
@@ -109,6 +119,7 @@ router.patch("/tasks/:id", requireAuth, async (req, res): Promise<void> => {
   if (parsed.data.estimatedHours != null) updateData.estimatedHours = String(parsed.data.estimatedHours);
   if (parsed.data.loggedHours != null) updateData.loggedHours = String(parsed.data.loggedHours);
 
+  const [before] = await db.select({ assigneeId: tasksTable.assigneeId }).from(tasksTable).where(eq(tasksTable.id, params.data.id)).limit(1);
   const [updated] = await db.update(tasksTable).set(updateData).where(eq(tasksTable.id, params.data.id)).returning();
   if (!updated) {
     res.status(404).json({ error: "Task not found" });
@@ -116,6 +127,15 @@ router.patch("/tasks/:id", requireAuth, async (req, res): Promise<void> => {
   }
   if (updated.status === "done") {
     await logActivity(user.id, "task_completed", `Completed task "${updated.title}"`, updated.id, "task");
+  }
+  if (updated.assigneeId && updated.assigneeId !== user.id && updated.assigneeId !== before?.assigneeId) {
+    const actor = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Someone";
+    await notifyUsers([updated.assigneeId], {
+      type: "task_assigned",
+      title: `Task assigned: ${updated.title}`,
+      body: `${actor} assigned you a task`,
+      link: "/tasks",
+    });
   }
   res.json(await formatTask(updated));
 });
