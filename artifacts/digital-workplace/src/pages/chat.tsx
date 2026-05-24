@@ -66,6 +66,16 @@ function NewChatDialog({ meId, onCreated }: { meId?: number; onCreated: (id: num
     if (!q) return true;
     return `${u.firstName} ${u.lastName} ${u.email ?? ""} ${u.jobTitle ?? ""}`.toLowerCase().includes(q);
   });
+  const selectedMembers = others.filter((u: any) => memberIds.includes(u.id));
+  const allVisibleSelected = filtered.length > 0 && filtered.every((u: any) => memberIds.includes(u.id));
+  const toggleAllVisible = () => {
+    const visibleIds = filtered.map((u: any) => u.id as number);
+    if (allVisibleSelected) {
+      setMemberIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
+    } else {
+      setMemberIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
+    }
+  };
 
   const reset = () => {
     setKind("direct"); setDirectId(""); setName(""); setMemberIds([]); setFilter("");
@@ -143,22 +153,54 @@ function NewChatDialog({ meId, onCreated }: { meId?: number; onCreated: (id: num
               <div className="space-y-1.5">
                 <Label>Members</Label>
                 <Input data-testid="input-member-filter" value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Search teammates..." />
+                {selectedMembers.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 p-2 border rounded-md bg-muted/40">
+                    {selectedMembers.map((u: any) => (
+                      <Badge
+                        key={u.id}
+                        variant="secondary"
+                        className="gap-1 pr-1 cursor-pointer hover:bg-destructive/10"
+                        data-testid={`pill-member-${u.id}`}
+                        onClick={() => toggle(u.id)}
+                      >
+                        {u.firstName} {u.lastName}
+                        <span className="text-muted-foreground hover:text-destructive">×</span>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
                 <div className="max-h-56 overflow-y-auto border rounded-md divide-y">
                   {filtered.length === 0 ? (
                     <p className="p-3 text-sm text-muted-foreground">No matches.</p>
-                  ) : filtered.map((u: any) => (
-                    <label key={u.id} className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-accent">
-                      <Checkbox
-                        data-testid={`checkbox-member-${u.id}`}
-                        checked={memberIds.includes(u.id)}
-                        onCheckedChange={() => toggle(u.id)}
-                      />
-                      <span className="flex-1">{u.firstName} {u.lastName}</span>
-                      {u.jobTitle && <span className="text-xs text-muted-foreground">{u.jobTitle}</span>}
-                    </label>
-                  ))}
+                  ) : (
+                    <>
+                      {filtered.length > 1 && (
+                        <label className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-accent bg-muted/30 font-medium">
+                          <Checkbox
+                            data-testid="checkbox-select-all-members"
+                            checked={allVisibleSelected}
+                            onCheckedChange={toggleAllVisible}
+                          />
+                          <span className="flex-1">{allVisibleSelected ? "Deselect all" : "Select all"} ({filtered.length})</span>
+                        </label>
+                      )}
+                      {filtered.map((u: any) => (
+                        <label key={u.id} className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-accent">
+                          <Checkbox
+                            data-testid={`checkbox-member-${u.id}`}
+                            checked={memberIds.includes(u.id)}
+                            onCheckedChange={() => toggle(u.id)}
+                          />
+                          <span className="flex-1">{u.firstName} {u.lastName}</span>
+                          {u.jobTitle && <span className="text-xs text-muted-foreground">{u.jobTitle}</span>}
+                        </label>
+                      ))}
+                    </>
+                  )}
                 </div>
-                {memberIds.length > 0 && <p className="text-xs text-muted-foreground">{memberIds.length} selected</p>}
+                <p className="text-xs text-muted-foreground">
+                  {memberIds.length === 0 ? "No members selected yet" : `${memberIds.length} selected`}
+                </p>
               </div>
             </>
           )}

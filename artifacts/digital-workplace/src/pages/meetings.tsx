@@ -50,7 +50,8 @@ function CreateMeetingDialog({ onCreated, currentUserId }: { onCreated: () => vo
   const [duration, setDuration] = useState(30);
   const [oneOnOneId, setOneOnOneId] = useState<string>("");
   const [groupIds, setGroupIds] = useState<number[]>([]);
-  const [notifyEveryone, setNotifyEveryone] = useState(true);
+  const [notifyEveryone, setNotifyEveryone] = useState(false);
+  const [participantFilter, setParticipantFilter] = useState("");
   const create = useCreateMeeting();
   const { data: users } = useListUsers();
   const { toast } = useToast();
@@ -60,7 +61,24 @@ function CreateMeetingDialog({ onCreated, currentUserId }: { onCreated: () => vo
 
   const reset = () => {
     setKind("group"); setTitle(""); setDescription(""); setDuration(30);
-    setOneOnOneId(""); setGroupIds([]); setNotifyEveryone(true);
+    setOneOnOneId(""); setGroupIds([]); setNotifyEveryone(false); setParticipantFilter("");
+  };
+
+  const filteredOthers = others.filter((u: any) => {
+    const q = participantFilter.toLowerCase().trim();
+    if (!q) return true;
+    return `${u.firstName} ${u.lastName} ${u.email ?? ""} ${u.jobTitle ?? ""}`.toLowerCase().includes(q);
+  });
+
+  const selectedUsers = others.filter((u: any) => groupIds.includes(u.id));
+  const allVisibleSelected = filteredOthers.length > 0 && filteredOthers.every((u: any) => groupIds.includes(u.id));
+  const toggleAllVisible = () => {
+    const visibleIds = filteredOthers.map((u: any) => u.id as number);
+    if (allVisibleSelected) {
+      setGroupIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
+    } else {
+      setGroupIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
+    }
   };
 
   const toggleGroup = (id: number) => {
@@ -164,34 +182,76 @@ function CreateMeetingDialog({ onCreated, currentUserId }: { onCreated: () => vo
             </div>
           ) : (
             <div className="space-y-2">
-              <Label>Participants</Label>
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  data-testid="checkbox-notify-everyone"
-                  checked={notifyEveryone}
-                  onCheckedChange={(c) => setNotifyEveryone(c === true)}
-                />
-                Invite everyone in the workplace
-              </label>
+              <div className="flex items-center justify-between">
+                <Label>Participants</Label>
+                <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+                  <Checkbox
+                    data-testid="checkbox-notify-everyone"
+                    checked={notifyEveryone}
+                    onCheckedChange={(c) => setNotifyEveryone(c === true)}
+                  />
+                  Invite everyone
+                </label>
+              </div>
               {!notifyEveryone && (
-                <div className="max-h-48 overflow-y-auto border rounded-md divide-y">
-                  {others.length === 0 ? (
-                    <p className="p-3 text-sm text-muted-foreground">No other users available.</p>
-                  ) : others.map((u: any) => (
-                    <label key={u.id} className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-accent">
-                      <Checkbox
-                        data-testid={`checkbox-participant-${u.id}`}
-                        checked={groupIds.includes(u.id)}
-                        onCheckedChange={() => toggleGroup(u.id)}
-                      />
-                      <span className="flex-1">{u.firstName} {u.lastName}</span>
-                      {u.jobTitle && <span className="text-xs text-muted-foreground">{u.jobTitle}</span>}
-                    </label>
-                  ))}
-                </div>
-              )}
-              {!notifyEveryone && groupIds.length > 0 && (
-                <p className="text-xs text-muted-foreground">{groupIds.length} selected</p>
+                <>
+                  <Input
+                    data-testid="input-participant-filter"
+                    value={participantFilter}
+                    onChange={(e) => setParticipantFilter(e.target.value)}
+                    placeholder="Search teammates..."
+                  />
+                  {selectedUsers.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 p-2 border rounded-md bg-muted/40">
+                      {selectedUsers.map((u: any) => (
+                        <Badge
+                          key={u.id}
+                          variant="secondary"
+                          className="gap-1 pr-1 cursor-pointer hover:bg-destructive/10"
+                          data-testid={`pill-participant-${u.id}`}
+                          onClick={() => toggleGroup(u.id)}
+                        >
+                          {u.firstName} {u.lastName}
+                          <span className="text-muted-foreground hover:text-destructive">×</span>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <div className="max-h-48 overflow-y-auto border rounded-md divide-y">
+                    {filteredOthers.length === 0 ? (
+                      <p className="p-3 text-sm text-muted-foreground">
+                        {others.length === 0 ? "No other users available." : "No matches."}
+                      </p>
+                    ) : (
+                      <>
+                        {filteredOthers.length > 1 && (
+                          <label className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-accent bg-muted/30 font-medium">
+                            <Checkbox
+                              data-testid="checkbox-select-all-participants"
+                              checked={allVisibleSelected}
+                              onCheckedChange={toggleAllVisible}
+                            />
+                            <span className="flex-1">{allVisibleSelected ? "Deselect all" : "Select all"} ({filteredOthers.length})</span>
+                          </label>
+                        )}
+                        {filteredOthers.map((u: any) => (
+                          <label key={u.id} className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-accent">
+                            <Checkbox
+                              data-testid={`checkbox-participant-${u.id}`}
+                              checked={groupIds.includes(u.id)}
+                              onCheckedChange={() => toggleGroup(u.id)}
+                            />
+                            <span className="flex-1">{u.firstName} {u.lastName}</span>
+                            {u.jobTitle && <span className="text-xs text-muted-foreground">{u.jobTitle}</span>}
+                          </label>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {groupIds.length === 0 ? "No participants selected yet" : `${groupIds.length} selected`}
+                  </p>
+                </>
               )}
             </div>
           )}
