@@ -17,6 +17,7 @@ import TasksPage from "@/pages/tasks";
 import DocumentsPage from "@/pages/documents";
 import HRPage from "@/pages/hr";
 import ReimbursementsPage from "@/pages/reimbursements";
+import PerformancePage from "@/pages/performance";
 import MeetingsPage from "@/pages/meetings";
 import ChatPage from "@/pages/chat";
 import AnalyticsPage from "@/pages/analytics";
@@ -194,6 +195,7 @@ function ClerkProviderWithRoutes() {
           <Route path="/documents" component={() => <ProtectedRoute component={DocumentsPage} />} />
           <Route path="/hr" component={() => <ProtectedRoute component={HRPage} />} />
           <Route path="/reimbursements" component={() => <ProtectedRoute component={ReimbursementsPage} />} />
+          <Route path="/performance" component={() => <ProtectedRoute component={PerformancePage} />} />
           <Route path="/meetings" component={() => <ProtectedRoute component={MeetingsPage} />} />
           <Route path="/chat" component={() => <ProtectedRoute component={ChatPage} />} />
           <Route path="/analytics" component={() => <ProtectedRoute component={AnalyticsPage} />} />

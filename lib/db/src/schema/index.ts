@@ -7,3 +7,4 @@ export * from "./meetings";
 export * from "./notifications";
 export * from "./chat";
 export * from "./reimbursements";
+export * from "./performance";

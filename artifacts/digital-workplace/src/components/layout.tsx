@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import NotificationBell from "@/components/notification-bell";
 import {
   LayoutDashboard, FolderKanban, CheckSquare, FileText, Users,
-  BarChart2, Settings, LogOut, Sun, Moon, Menu, X, Shield, BookOpen, Video, MessageCircle, Receipt,
+  BarChart2, Settings, LogOut, Sun, Moon, Menu, X, Shield, BookOpen, Video, MessageCircle, Receipt, Award,
 } from "lucide-react";
 
 const navItems = [
@@ -21,6 +21,7 @@ const navItems = [
   { href: "/documents", icon: FileText, label: "Documents" },
   { href: "/hr", icon: Users, label: "HR" },
   { href: "/reimbursements", icon: Receipt, label: "Reimbursements" },
+  { href: "/performance", icon: Award, label: "Performance" },
   { href: "/meetings", icon: Video, label: "Meetings" },
   { href: "/chat", icon: MessageCircle, label: "Chat" },
   { href: "/analytics", icon: BarChart2, label: "Analytics" },

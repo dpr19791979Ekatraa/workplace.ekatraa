@@ -13,6 +13,7 @@ import meetingsRouter from "./meetings";
 import notificationsRouter from "./notifications";
 import chatRouter from "./chat";
 import reimbursementsRouter from "./reimbursements";
+import performanceRouter from "./performance";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(meetingsRouter);
 router.use(notificationsRouter);
 router.use(chatRouter);
 router.use(reimbursementsRouter);
+router.use(performanceRouter);
 
 export default router;

@@ -1000,6 +1000,425 @@ export const GetReimbursementSummaryResponse = zod.object({
 
 
 /**
+ * @summary List goals
+ */
+export const ListGoalsQueryParams = zod.object({
+  "userId": zod.coerce.number().optional(),
+  "status": zod.coerce.string().optional()
+})
+
+export const ListGoalsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string().optional(),
+  "userAvatar": zod.string().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "category": zod.string(),
+  "weight": zod.number(),
+  "targetValue": zod.number().nullish(),
+  "currentValue": zod.number().nullish(),
+  "unit": zod.string().nullish(),
+  "dueDate": zod.coerce.date().nullish(),
+  "status": zod.enum(['not_started', 'in_progress', 'completed', 'missed', 'cancelled']),
+  "progressPercent": zod.number().optional(),
+  "createdById": zod.number().optional(),
+  "createdAt": zod.coerce.date()
+})
+export const ListGoalsResponse = zod.array(ListGoalsResponseItem)
+
+
+/**
+ * @summary Create a goal
+ */
+
+export const createGoalBodyCategoryDefault = `personal`;
+export const createGoalBodyWeightDefault = 1;
+export const createGoalBodyWeightMax = 10;
+
+
+
+export const CreateGoalBody = zod.object({
+  "userId": zod.number().nullish(),
+  "title": zod.string().min(1),
+  "description": zod.string().nullish(),
+  "category": zod.string().default(createGoalBodyCategoryDefault),
+  "weight": zod.number().min(1).max(createGoalBodyWeightMax).default(createGoalBodyWeightDefault),
+  "targetValue": zod.number().nullish(),
+  "currentValue": zod.number().nullish(),
+  "unit": zod.string().nullish(),
+  "dueDate": zod.coerce.date().nullish()
+})
+
+
+/**
+ * @summary Update goal progress or status
+ */
+export const UpdateGoalParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateGoalBody = zod.object({
+  "title": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "weight": zod.number().nullish(),
+  "targetValue": zod.number().nullish(),
+  "currentValue": zod.number().nullish(),
+  "unit": zod.string().nullish(),
+  "dueDate": zod.coerce.date().nullish(),
+  "status": zod.union([zod.literal('not_started'),zod.literal('in_progress'),zod.literal('completed'),zod.literal('missed'),zod.literal('cancelled'),zod.literal(null)]).nullish()
+})
+
+export const UpdateGoalResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string().optional(),
+  "userAvatar": zod.string().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "category": zod.string(),
+  "weight": zod.number(),
+  "targetValue": zod.number().nullish(),
+  "currentValue": zod.number().nullish(),
+  "unit": zod.string().nullish(),
+  "dueDate": zod.coerce.date().nullish(),
+  "status": zod.enum(['not_started', 'in_progress', 'completed', 'missed', 'cancelled']),
+  "progressPercent": zod.number().optional(),
+  "createdById": zod.number().optional(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete a goal
+ */
+export const DeleteGoalParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary List KPIs
+ */
+export const ListKpisQueryParams = zod.object({
+  "userId": zod.coerce.number().optional()
+})
+
+export const ListKpisResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string().optional(),
+  "userAvatar": zod.string().nullish(),
+  "name": zod.string(),
+  "target": zod.number(),
+  "current": zod.number(),
+  "unit": zod.string().nullish(),
+  "period": zod.enum(['monthly', 'quarterly', 'yearly']),
+  "periodStart": zod.coerce.date(),
+  "periodEnd": zod.coerce.date(),
+  "attainmentPercent": zod.number().optional(),
+  "createdAt": zod.coerce.date()
+})
+export const ListKpisResponse = zod.array(ListKpisResponseItem)
+
+
+/**
+ * @summary Create a KPI
+ */
+
+export const createKpiBodyCurrentDefault = 0;
+export const createKpiBodyPeriodDefault = `quarterly`;
+
+export const CreateKpiBody = zod.object({
+  "userId": zod.number().nullish(),
+  "name": zod.string().min(1),
+  "target": zod.number(),
+  "current": zod.number().default(createKpiBodyCurrentDefault),
+  "unit": zod.string().nullish(),
+  "period": zod.enum(['monthly', 'quarterly', 'yearly']).default(createKpiBodyPeriodDefault),
+  "periodStart": zod.coerce.date(),
+  "periodEnd": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update KPI current value
+ */
+export const UpdateKpiParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateKpiBody = zod.object({
+  "name": zod.string().nullish(),
+  "target": zod.number().nullish(),
+  "current": zod.number().nullish(),
+  "unit": zod.string().nullish(),
+  "period": zod.union([zod.literal('monthly'),zod.literal('quarterly'),zod.literal('yearly'),zod.literal(null)]).nullish(),
+  "periodStart": zod.coerce.date().nullish(),
+  "periodEnd": zod.coerce.date().nullish()
+})
+
+export const UpdateKpiResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string().optional(),
+  "userAvatar": zod.string().nullish(),
+  "name": zod.string(),
+  "target": zod.number(),
+  "current": zod.number(),
+  "unit": zod.string().nullish(),
+  "period": zod.enum(['monthly', 'quarterly', 'yearly']),
+  "periodStart": zod.coerce.date(),
+  "periodEnd": zod.coerce.date(),
+  "attainmentPercent": zod.number().optional(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete KPI
+ */
+export const DeleteKpiParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary List performance reviews (incl. 360 feedback)
+ */
+export const ListPerfReviewsQueryParams = zod.object({
+  "revieweeId": zod.coerce.number().optional(),
+  "reviewerId": zod.coerce.number().optional(),
+  "cycle": zod.coerce.string().optional(),
+  "type": zod.coerce.string().optional()
+})
+
+export const ListPerfReviewsResponseItem = zod.object({
+  "id": zod.number(),
+  "revieweeId": zod.number(),
+  "revieweeName": zod.string().optional(),
+  "reviewerId": zod.number(),
+  "reviewerName": zod.string().optional(),
+  "cycle": zod.string(),
+  "type": zod.enum(['self', 'manager', 'peer', 'upward']),
+  "anonymous": zod.boolean().optional(),
+  "ratings": zod.record(zod.string(), zod.number()).optional(),
+  "overallRating": zod.number().nullish(),
+  "strengths": zod.string().nullish(),
+  "improvements": zod.string().nullish(),
+  "comments": zod.string().nullish(),
+  "status": zod.enum(['draft', 'submitted']),
+  "submittedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date()
+})
+export const ListPerfReviewsResponse = zod.array(ListPerfReviewsResponseItem)
+
+
+/**
+ * @summary Submit performance review or 360 feedback
+ */
+
+export const createPerfReviewBodyAnonymousDefault = false;
+export const createPerfReviewBodyOverallRatingMax = 5;
+
+export const createPerfReviewBodySubmitDefault = true;
+
+export const CreatePerfReviewBody = zod.object({
+  "revieweeId": zod.number(),
+  "cycle": zod.string().min(1),
+  "type": zod.enum(['self', 'manager', 'peer', 'upward']),
+  "anonymous": zod.boolean().default(createPerfReviewBodyAnonymousDefault),
+  "ratings": zod.record(zod.string(), zod.number()).optional(),
+  "overallRating": zod.number().min(1).max(createPerfReviewBodyOverallRatingMax).nullish(),
+  "strengths": zod.string().nullish(),
+  "improvements": zod.string().nullish(),
+  "comments": zod.string().nullish(),
+  "submit": zod.boolean().default(createPerfReviewBodySubmitDefault)
+})
+
+
+/**
+ * @summary List appraisals
+ */
+export const ListAppraisalsQueryParams = zod.object({
+  "userId": zod.coerce.number().optional(),
+  "cycle": zod.coerce.string().optional()
+})
+
+export const ListAppraisalsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string().optional(),
+  "userAvatar": zod.string().nullish(),
+  "cycle": zod.string(),
+  "finalRating": zod.number(),
+  "salaryChangePercent": zod.number().nullish(),
+  "bonusAmount": zod.number().nullish(),
+  "currency": zod.string(),
+  "notes": zod.string().nullish(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "createdById": zod.number().optional(),
+  "decidedById": zod.number().nullish(),
+  "decidedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date()
+})
+export const ListAppraisalsResponse = zod.array(ListAppraisalsResponseItem)
+
+
+/**
+ * @summary Propose an appraisal (HR/admin only)
+ */
+
+export const createAppraisalBodyFinalRatingMax = 5;
+
+export const createAppraisalBodyCurrencyDefault = `INR`;
+
+export const CreateAppraisalBody = zod.object({
+  "userId": zod.number(),
+  "cycle": zod.string().min(1),
+  "finalRating": zod.number().min(1).max(createAppraisalBodyFinalRatingMax),
+  "salaryChangePercent": zod.number().nullish(),
+  "bonusAmount": zod.number().nullish(),
+  "currency": zod.string().default(createAppraisalBodyCurrencyDefault),
+  "notes": zod.string().nullish()
+})
+
+
+/**
+ * @summary Approve/reject an appraisal
+ */
+export const UpdateAppraisalStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateAppraisalStatusBody = zod.object({
+  "status": zod.enum(['approved', 'rejected'])
+})
+
+export const UpdateAppraisalStatusResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string().optional(),
+  "userAvatar": zod.string().nullish(),
+  "cycle": zod.string(),
+  "finalRating": zod.number(),
+  "salaryChangePercent": zod.number().nullish(),
+  "bonusAmount": zod.number().nullish(),
+  "currency": zod.string(),
+  "notes": zod.string().nullish(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "createdById": zod.number().optional(),
+  "decidedById": zod.number().nullish(),
+  "decidedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List promotions
+ */
+export const ListPromotionsQueryParams = zod.object({
+  "userId": zod.coerce.number().optional()
+})
+
+export const ListPromotionsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string().optional(),
+  "userAvatar": zod.string().nullish(),
+  "fromTitle": zod.string(),
+  "toTitle": zod.string(),
+  "fromLevel": zod.string().nullish(),
+  "toLevel": zod.string().nullish(),
+  "effectiveDate": zod.coerce.date(),
+  "reason": zod.string().nullish(),
+  "status": zod.enum(['proposed', 'approved', 'rejected', 'effective']),
+  "requestedById": zod.number().optional(),
+  "requestedByName": zod.string().nullish(),
+  "decidedById": zod.number().nullish(),
+  "decidedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date()
+})
+export const ListPromotionsResponse = zod.array(ListPromotionsResponseItem)
+
+
+/**
+ * @summary Propose a promotion
+ */
+
+
+
+
+export const CreatePromotionBody = zod.object({
+  "userId": zod.number(),
+  "fromTitle": zod.string().min(1),
+  "toTitle": zod.string().min(1),
+  "fromLevel": zod.string().nullish(),
+  "toLevel": zod.string().nullish(),
+  "effectiveDate": zod.coerce.date(),
+  "reason": zod.string().nullish()
+})
+
+
+/**
+ * @summary Approve/reject promotion
+ */
+export const UpdatePromotionStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdatePromotionStatusBody = zod.object({
+  "status": zod.enum(['approved', 'rejected', 'effective'])
+})
+
+export const UpdatePromotionStatusResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string().optional(),
+  "userAvatar": zod.string().nullish(),
+  "fromTitle": zod.string(),
+  "toTitle": zod.string(),
+  "fromLevel": zod.string().nullish(),
+  "toLevel": zod.string().nullish(),
+  "effectiveDate": zod.coerce.date(),
+  "reason": zod.string().nullish(),
+  "status": zod.enum(['proposed', 'approved', 'rejected', 'effective']),
+  "requestedById": zod.number().optional(),
+  "requestedByName": zod.string().nullish(),
+  "decidedById": zod.number().nullish(),
+  "decidedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get organization-wide performance metrics
+ */
+export const GetPerformanceAnalyticsResponse = zod.object({
+  "totalGoals": zod.number(),
+  "completedGoals": zod.number(),
+  "goalCompletionRate": zod.number(),
+  "avgKpiAttainment": zod.number(),
+  "avgOverallRating": zod.number(),
+  "reviewsSubmitted": zod.number(),
+  "pendingAppraisals": zod.number(),
+  "pendingPromotions": zod.number(),
+  "topPerformers": zod.array(zod.object({
+  "userId": zod.number(),
+  "userName": zod.string(),
+  "userAvatar": zod.string().nullish(),
+  "avgRating": zod.number(),
+  "goalsCompleted": zod.number()
+})),
+  "ratingDistribution": zod.array(zod.object({
+  "bucket": zod.string(),
+  "count": zod.number()
+}))
+})
+
+
+/**
  * @summary Get main dashboard analytics
  */
 export const GetDashboardAnalyticsResponse = zod.object({

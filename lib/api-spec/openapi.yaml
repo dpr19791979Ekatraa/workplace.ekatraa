@@ -35,6 +35,8 @@ tags:
     description: In-app notifications
   - name: reimbursements
     description: Employee expense reimbursements
+  - name: performance
+    description: Performance management — goals, KPIs, reviews, appraisals, promotions
 
 paths:
   /healthz:
@@ -883,6 +885,261 @@ paths:
                   approvedAmount: { type: number }
                   paidAmount: { type: number }
                   currency: { type: string }
+
+  # ── Performance ────────────────────────────────────────────────────────
+  /performance/goals:
+    get:
+      operationId: listGoals
+      tags: [performance]
+      summary: List goals
+      parameters:
+        - { name: userId, in: query, schema: { type: integer } }
+        - { name: status, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Goals
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Goal" } }
+    post:
+      operationId: createGoal
+      tags: [performance]
+      summary: Create a goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/GoalInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Goal" }
+
+  /performance/goals/{id}:
+    patch:
+      operationId: updateGoal
+      tags: [performance]
+      summary: Update goal progress or status
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/GoalUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Goal" }
+    delete:
+      operationId: deleteGoal
+      tags: [performance]
+      summary: Delete a goal
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: Deleted }
+
+  /performance/kpis:
+    get:
+      operationId: listKpis
+      tags: [performance]
+      summary: List KPIs
+      parameters:
+        - { name: userId, in: query, schema: { type: integer } }
+      responses:
+        "200":
+          description: KPIs
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Kpi" } }
+    post:
+      operationId: createKpi
+      tags: [performance]
+      summary: Create a KPI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/KpiInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Kpi" }
+
+  /performance/kpis/{id}:
+    patch:
+      operationId: updateKpi
+      tags: [performance]
+      summary: Update KPI current value
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/KpiUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Kpi" }
+    delete:
+      operationId: deleteKpi
+      tags: [performance]
+      summary: Delete KPI
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: Deleted }
+
+  /performance/reviews:
+    get:
+      operationId: listPerfReviews
+      tags: [performance]
+      summary: List performance reviews (incl. 360 feedback)
+      parameters:
+        - { name: revieweeId, in: query, schema: { type: integer } }
+        - { name: reviewerId, in: query, schema: { type: integer } }
+        - { name: cycle, in: query, schema: { type: string } }
+        - { name: type, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Reviews
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/PerfReview" } }
+    post:
+      operationId: createPerfReview
+      tags: [performance]
+      summary: Submit performance review or 360 feedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PerfReviewInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PerfReview" }
+
+  /performance/appraisals:
+    get:
+      operationId: listAppraisals
+      tags: [performance]
+      summary: List appraisals
+      parameters:
+        - { name: userId, in: query, schema: { type: integer } }
+        - { name: cycle, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Appraisals
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Appraisal" } }
+    post:
+      operationId: createAppraisal
+      tags: [performance]
+      summary: Propose an appraisal (HR/admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AppraisalInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Appraisal" }
+
+  /performance/appraisals/{id}/status:
+    patch:
+      operationId: updateAppraisalStatus
+      tags: [performance]
+      summary: Approve/reject an appraisal
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AppraisalStatusUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Appraisal" }
+
+  /performance/promotions:
+    get:
+      operationId: listPromotions
+      tags: [performance]
+      summary: List promotions
+      parameters:
+        - { name: userId, in: query, schema: { type: integer } }
+      responses:
+        "200":
+          description: Promotions
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Promotion" } }
+    post:
+      operationId: createPromotion
+      tags: [performance]
+      summary: Propose a promotion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PromotionInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Promotion" }
+
+  /performance/promotions/{id}/status:
+    patch:
+      operationId: updatePromotionStatus
+      tags: [performance]
+      summary: Approve/reject promotion
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PromotionStatusUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Promotion" }
+
+  /performance/analytics:
+    get:
+      operationId: getPerformanceAnalytics
+      tags: [performance]
+      summary: Get organization-wide performance metrics
+      responses:
+        "200":
+          description: Analytics
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PerformanceAnalytics" }
 
   # ── Analytics ──────────────────────────────────────────────────────────────
   /analytics/dashboard:
@@ -2208,3 +2465,263 @@ components:
           type: string
           enum: [approved, rejected, paid, cancelled]
         reviewNotes: { type: ["string", "null"] }
+
+    # ── Performance ────────────────────────────────────────────────────────
+    Goal:
+      type: object
+      required: [id, userId, title, category, weight, status, createdAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        userName: { type: string }
+        userAvatar: { type: ["string", "null"] }
+        title: { type: string }
+        description: { type: ["string", "null"] }
+        category: { type: string }
+        weight: { type: integer }
+        targetValue: { type: ["number", "null"] }
+        currentValue: { type: ["number", "null"] }
+        unit: { type: ["string", "null"] }
+        dueDate: { type: ["string", "null"], format: date }
+        status:
+          type: string
+          enum: [not_started, in_progress, completed, missed, cancelled]
+        progressPercent: { type: number }
+        createdById: { type: integer }
+        createdAt: { type: string, format: date-time }
+
+    GoalInput:
+      type: object
+      required: [title]
+      properties:
+        userId: { type: ["integer", "null"] }
+        title: { type: string, minLength: 1 }
+        description: { type: ["string", "null"] }
+        category: { type: string, default: "personal" }
+        weight: { type: integer, minimum: 1, maximum: 10, default: 1 }
+        targetValue: { type: ["number", "null"] }
+        currentValue: { type: ["number", "null"] }
+        unit: { type: ["string", "null"] }
+        dueDate: { type: ["string", "null"], format: date }
+
+    GoalUpdate:
+      type: object
+      properties:
+        title: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        category: { type: ["string", "null"] }
+        weight: { type: ["integer", "null"] }
+        targetValue: { type: ["number", "null"] }
+        currentValue: { type: ["number", "null"] }
+        unit: { type: ["string", "null"] }
+        dueDate: { type: ["string", "null"], format: date }
+        status:
+          type: ["string", "null"]
+          enum: [not_started, in_progress, completed, missed, cancelled, null]
+
+    Kpi:
+      type: object
+      required: [id, userId, name, target, current, period, periodStart, periodEnd, createdAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        userName: { type: string }
+        userAvatar: { type: ["string", "null"] }
+        name: { type: string }
+        target: { type: number }
+        current: { type: number }
+        unit: { type: ["string", "null"] }
+        period: { type: string, enum: [monthly, quarterly, yearly] }
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+        attainmentPercent: { type: number }
+        createdAt: { type: string, format: date-time }
+
+    KpiInput:
+      type: object
+      required: [name, target, periodStart, periodEnd]
+      properties:
+        userId: { type: ["integer", "null"] }
+        name: { type: string, minLength: 1 }
+        target: { type: number }
+        current: { type: number, default: 0 }
+        unit: { type: ["string", "null"] }
+        period: { type: string, enum: [monthly, quarterly, yearly], default: quarterly }
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+
+    KpiUpdate:
+      type: object
+      properties:
+        name: { type: ["string", "null"] }
+        target: { type: ["number", "null"] }
+        current: { type: ["number", "null"] }
+        unit: { type: ["string", "null"] }
+        period:
+          type: ["string", "null"]
+          enum: [monthly, quarterly, yearly, null]
+        periodStart: { type: ["string", "null"], format: date }
+        periodEnd: { type: ["string", "null"], format: date }
+
+    PerfReview:
+      type: object
+      required: [id, revieweeId, reviewerId, cycle, type, status, createdAt]
+      properties:
+        id: { type: integer }
+        revieweeId: { type: integer }
+        revieweeName: { type: string }
+        reviewerId: { type: integer }
+        reviewerName: { type: string }
+        cycle: { type: string }
+        type:
+          type: string
+          enum: [self, manager, peer, upward]
+        anonymous: { type: boolean }
+        ratings:
+          type: object
+          additionalProperties: { type: number }
+        overallRating: { type: ["number", "null"] }
+        strengths: { type: ["string", "null"] }
+        improvements: { type: ["string", "null"] }
+        comments: { type: ["string", "null"] }
+        status:
+          type: string
+          enum: [draft, submitted]
+        submittedAt: { type: ["string", "null"], format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    PerfReviewInput:
+      type: object
+      required: [revieweeId, cycle, type]
+      properties:
+        revieweeId: { type: integer }
+        cycle: { type: string, minLength: 1 }
+        type:
+          type: string
+          enum: [self, manager, peer, upward]
+        anonymous: { type: boolean, default: false }
+        ratings:
+          type: object
+          additionalProperties: { type: number }
+        overallRating: { type: ["number", "null"], minimum: 1, maximum: 5 }
+        strengths: { type: ["string", "null"] }
+        improvements: { type: ["string", "null"] }
+        comments: { type: ["string", "null"] }
+        submit: { type: boolean, default: true }
+
+    Appraisal:
+      type: object
+      required: [id, userId, cycle, finalRating, currency, status, createdAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        userName: { type: string }
+        userAvatar: { type: ["string", "null"] }
+        cycle: { type: string }
+        finalRating: { type: number }
+        salaryChangePercent: { type: ["number", "null"] }
+        bonusAmount: { type: ["number", "null"] }
+        currency: { type: string }
+        notes: { type: ["string", "null"] }
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        createdById: { type: integer }
+        decidedById: { type: ["integer", "null"] }
+        decidedAt: { type: ["string", "null"], format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    AppraisalInput:
+      type: object
+      required: [userId, cycle, finalRating]
+      properties:
+        userId: { type: integer }
+        cycle: { type: string, minLength: 1 }
+        finalRating: { type: number, minimum: 1, maximum: 5 }
+        salaryChangePercent: { type: ["number", "null"] }
+        bonusAmount: { type: ["number", "null"] }
+        currency: { type: string, default: "INR" }
+        notes: { type: ["string", "null"] }
+
+    AppraisalStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [approved, rejected]
+
+    Promotion:
+      type: object
+      required: [id, userId, fromTitle, toTitle, effectiveDate, status, createdAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        userName: { type: string }
+        userAvatar: { type: ["string", "null"] }
+        fromTitle: { type: string }
+        toTitle: { type: string }
+        fromLevel: { type: ["string", "null"] }
+        toLevel: { type: ["string", "null"] }
+        effectiveDate: { type: string, format: date }
+        reason: { type: ["string", "null"] }
+        status:
+          type: string
+          enum: [proposed, approved, rejected, effective]
+        requestedById: { type: integer }
+        requestedByName: { type: ["string", "null"] }
+        decidedById: { type: ["integer", "null"] }
+        decidedAt: { type: ["string", "null"], format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    PromotionInput:
+      type: object
+      required: [userId, fromTitle, toTitle, effectiveDate]
+      properties:
+        userId: { type: integer }
+        fromTitle: { type: string, minLength: 1 }
+        toTitle: { type: string, minLength: 1 }
+        fromLevel: { type: ["string", "null"] }
+        toLevel: { type: ["string", "null"] }
+        effectiveDate: { type: string, format: date }
+        reason: { type: ["string", "null"] }
+
+    PromotionStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [approved, rejected, effective]
+
+    PerformanceAnalytics:
+      type: object
+      required: [totalGoals, completedGoals, goalCompletionRate, avgKpiAttainment, avgOverallRating, reviewsSubmitted, pendingAppraisals, pendingPromotions, topPerformers, ratingDistribution]
+      properties:
+        totalGoals: { type: integer }
+        completedGoals: { type: integer }
+        goalCompletionRate: { type: number }
+        avgKpiAttainment: { type: number }
+        avgOverallRating: { type: number }
+        reviewsSubmitted: { type: integer }
+        pendingAppraisals: { type: integer }
+        pendingPromotions: { type: integer }
+        topPerformers:
+          type: array
+          items:
+            type: object
+            required: [userId, userName, avgRating, goalsCompleted]
+            properties:
+              userId: { type: integer }
+              userName: { type: string }
+              userAvatar: { type: ["string", "null"] }
+              avgRating: { type: number }
+              goalsCompleted: { type: integer }
+        ratingDistribution:
+          type: array
+          items:
+            type: object
+            required: [bucket, count]
+            properties:
+              bucket: { type: string }
+              count: { type: integer }

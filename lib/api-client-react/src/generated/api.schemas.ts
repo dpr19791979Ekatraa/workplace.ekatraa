@@ -989,6 +989,411 @@ export interface ReimbursementStatusUpdate {
   reviewNotes?: string | null;
 }
 
+export type GoalStatus = typeof GoalStatus[keyof typeof GoalStatus];
+
+
+export const GoalStatus = {
+  not_started: 'not_started',
+  in_progress: 'in_progress',
+  completed: 'completed',
+  missed: 'missed',
+  cancelled: 'cancelled',
+} as const;
+
+export interface Goal {
+  id: number;
+  userId: number;
+  userName?: string;
+  /** @nullable */
+  userAvatar?: string | null;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  category: string;
+  weight: number;
+  /** @nullable */
+  targetValue?: number | null;
+  /** @nullable */
+  currentValue?: number | null;
+  /** @nullable */
+  unit?: string | null;
+  /** @nullable */
+  dueDate?: string | null;
+  status: GoalStatus;
+  progressPercent?: number;
+  createdById?: number;
+  createdAt: string;
+}
+
+export interface GoalInput {
+  /** @nullable */
+  userId?: number | null;
+  /** @minLength 1 */
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  category?: string;
+  /**
+     * @minimum 1
+     * @maximum 10
+     */
+  weight?: number;
+  /** @nullable */
+  targetValue?: number | null;
+  /** @nullable */
+  currentValue?: number | null;
+  /** @nullable */
+  unit?: string | null;
+  /** @nullable */
+  dueDate?: string | null;
+}
+
+/**
+ * @nullable
+ */
+export type GoalUpdateStatus = typeof GoalUpdateStatus[keyof typeof GoalUpdateStatus] | null;
+
+
+export const GoalUpdateStatus = {
+  not_started: 'not_started',
+  in_progress: 'in_progress',
+  completed: 'completed',
+  missed: 'missed',
+  cancelled: 'cancelled',
+} as const;
+
+export interface GoalUpdate {
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  category?: string | null;
+  /** @nullable */
+  weight?: number | null;
+  /** @nullable */
+  targetValue?: number | null;
+  /** @nullable */
+  currentValue?: number | null;
+  /** @nullable */
+  unit?: string | null;
+  /** @nullable */
+  dueDate?: string | null;
+  /** @nullable */
+  status?: GoalUpdateStatus;
+}
+
+export type KpiPeriod = typeof KpiPeriod[keyof typeof KpiPeriod];
+
+
+export const KpiPeriod = {
+  monthly: 'monthly',
+  quarterly: 'quarterly',
+  yearly: 'yearly',
+} as const;
+
+export interface Kpi {
+  id: number;
+  userId: number;
+  userName?: string;
+  /** @nullable */
+  userAvatar?: string | null;
+  name: string;
+  target: number;
+  current: number;
+  /** @nullable */
+  unit?: string | null;
+  period: KpiPeriod;
+  periodStart: string;
+  periodEnd: string;
+  attainmentPercent?: number;
+  createdAt: string;
+}
+
+export type KpiInputPeriod = typeof KpiInputPeriod[keyof typeof KpiInputPeriod];
+
+
+export const KpiInputPeriod = {
+  monthly: 'monthly',
+  quarterly: 'quarterly',
+  yearly: 'yearly',
+} as const;
+
+export interface KpiInput {
+  /** @nullable */
+  userId?: number | null;
+  /** @minLength 1 */
+  name: string;
+  target: number;
+  current?: number;
+  /** @nullable */
+  unit?: string | null;
+  period?: KpiInputPeriod;
+  periodStart: string;
+  periodEnd: string;
+}
+
+/**
+ * @nullable
+ */
+export type KpiUpdatePeriod = typeof KpiUpdatePeriod[keyof typeof KpiUpdatePeriod] | null;
+
+
+export const KpiUpdatePeriod = {
+  monthly: 'monthly',
+  quarterly: 'quarterly',
+  yearly: 'yearly',
+} as const;
+
+export interface KpiUpdate {
+  /** @nullable */
+  name?: string | null;
+  /** @nullable */
+  target?: number | null;
+  /** @nullable */
+  current?: number | null;
+  /** @nullable */
+  unit?: string | null;
+  /** @nullable */
+  period?: KpiUpdatePeriod;
+  /** @nullable */
+  periodStart?: string | null;
+  /** @nullable */
+  periodEnd?: string | null;
+}
+
+export type PerfReviewType = typeof PerfReviewType[keyof typeof PerfReviewType];
+
+
+export const PerfReviewType = {
+  self: 'self',
+  manager: 'manager',
+  peer: 'peer',
+  upward: 'upward',
+} as const;
+
+export type PerfReviewRatings = {[key: string]: number};
+
+export type PerfReviewStatus = typeof PerfReviewStatus[keyof typeof PerfReviewStatus];
+
+
+export const PerfReviewStatus = {
+  draft: 'draft',
+  submitted: 'submitted',
+} as const;
+
+export interface PerfReview {
+  id: number;
+  revieweeId: number;
+  revieweeName?: string;
+  reviewerId: number;
+  reviewerName?: string;
+  cycle: string;
+  type: PerfReviewType;
+  anonymous?: boolean;
+  ratings?: PerfReviewRatings;
+  /** @nullable */
+  overallRating?: number | null;
+  /** @nullable */
+  strengths?: string | null;
+  /** @nullable */
+  improvements?: string | null;
+  /** @nullable */
+  comments?: string | null;
+  status: PerfReviewStatus;
+  /** @nullable */
+  submittedAt?: string | null;
+  createdAt: string;
+}
+
+export type PerfReviewInputType = typeof PerfReviewInputType[keyof typeof PerfReviewInputType];
+
+
+export const PerfReviewInputType = {
+  self: 'self',
+  manager: 'manager',
+  peer: 'peer',
+  upward: 'upward',
+} as const;
+
+export type PerfReviewInputRatings = {[key: string]: number};
+
+export interface PerfReviewInput {
+  revieweeId: number;
+  /** @minLength 1 */
+  cycle: string;
+  type: PerfReviewInputType;
+  anonymous?: boolean;
+  ratings?: PerfReviewInputRatings;
+  /**
+     * @minimum 1
+     * @maximum 5
+     * @nullable
+     */
+  overallRating?: number | null;
+  /** @nullable */
+  strengths?: string | null;
+  /** @nullable */
+  improvements?: string | null;
+  /** @nullable */
+  comments?: string | null;
+  submit?: boolean;
+}
+
+export type AppraisalStatus = typeof AppraisalStatus[keyof typeof AppraisalStatus];
+
+
+export const AppraisalStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface Appraisal {
+  id: number;
+  userId: number;
+  userName?: string;
+  /** @nullable */
+  userAvatar?: string | null;
+  cycle: string;
+  finalRating: number;
+  /** @nullable */
+  salaryChangePercent?: number | null;
+  /** @nullable */
+  bonusAmount?: number | null;
+  currency: string;
+  /** @nullable */
+  notes?: string | null;
+  status: AppraisalStatus;
+  createdById?: number;
+  /** @nullable */
+  decidedById?: number | null;
+  /** @nullable */
+  decidedAt?: string | null;
+  createdAt: string;
+}
+
+export interface AppraisalInput {
+  userId: number;
+  /** @minLength 1 */
+  cycle: string;
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  finalRating: number;
+  /** @nullable */
+  salaryChangePercent?: number | null;
+  /** @nullable */
+  bonusAmount?: number | null;
+  currency?: string;
+  /** @nullable */
+  notes?: string | null;
+}
+
+export type AppraisalStatusUpdateStatus = typeof AppraisalStatusUpdateStatus[keyof typeof AppraisalStatusUpdateStatus];
+
+
+export const AppraisalStatusUpdateStatus = {
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface AppraisalStatusUpdate {
+  status: AppraisalStatusUpdateStatus;
+}
+
+export type PromotionStatus = typeof PromotionStatus[keyof typeof PromotionStatus];
+
+
+export const PromotionStatus = {
+  proposed: 'proposed',
+  approved: 'approved',
+  rejected: 'rejected',
+  effective: 'effective',
+} as const;
+
+export interface Promotion {
+  id: number;
+  userId: number;
+  userName?: string;
+  /** @nullable */
+  userAvatar?: string | null;
+  fromTitle: string;
+  toTitle: string;
+  /** @nullable */
+  fromLevel?: string | null;
+  /** @nullable */
+  toLevel?: string | null;
+  effectiveDate: string;
+  /** @nullable */
+  reason?: string | null;
+  status: PromotionStatus;
+  requestedById?: number;
+  /** @nullable */
+  requestedByName?: string | null;
+  /** @nullable */
+  decidedById?: number | null;
+  /** @nullable */
+  decidedAt?: string | null;
+  createdAt: string;
+}
+
+export interface PromotionInput {
+  userId: number;
+  /** @minLength 1 */
+  fromTitle: string;
+  /** @minLength 1 */
+  toTitle: string;
+  /** @nullable */
+  fromLevel?: string | null;
+  /** @nullable */
+  toLevel?: string | null;
+  effectiveDate: string;
+  /** @nullable */
+  reason?: string | null;
+}
+
+export type PromotionStatusUpdateStatus = typeof PromotionStatusUpdateStatus[keyof typeof PromotionStatusUpdateStatus];
+
+
+export const PromotionStatusUpdateStatus = {
+  approved: 'approved',
+  rejected: 'rejected',
+  effective: 'effective',
+} as const;
+
+export interface PromotionStatusUpdate {
+  status: PromotionStatusUpdateStatus;
+}
+
+export type PerformanceAnalyticsTopPerformersItem = {
+  userId: number;
+  userName: string;
+  /** @nullable */
+  userAvatar?: string | null;
+  avgRating: number;
+  goalsCompleted: number;
+};
+
+export type PerformanceAnalyticsRatingDistributionItem = {
+  bucket: string;
+  count: number;
+};
+
+export interface PerformanceAnalytics {
+  totalGoals: number;
+  completedGoals: number;
+  goalCompletionRate: number;
+  avgKpiAttainment: number;
+  avgOverallRating: number;
+  reviewsSubmitted: number;
+  pendingAppraisals: number;
+  pendingPromotions: number;
+  topPerformers: PerformanceAnalyticsTopPerformersItem[];
+  ratingDistribution: PerformanceAnalyticsRatingDistributionItem[];
+}
+
 export type ListUsersParams = {
 department?: string;
 role?: string;
@@ -1051,6 +1456,31 @@ export type GetReimbursementSummary200 = {
   approvedAmount: number;
   paidAmount: number;
   currency: string;
+};
+
+export type ListGoalsParams = {
+userId?: number;
+status?: string;
+};
+
+export type ListKpisParams = {
+userId?: number;
+};
+
+export type ListPerfReviewsParams = {
+revieweeId?: number;
+reviewerId?: number;
+cycle?: string;
+type?: string;
+};
+
+export type ListAppraisalsParams = {
+userId?: number;
+cycle?: string;
+};
+
+export type ListPromotionsParams = {
+userId?: number;
 };
 
 export type GetActivityFeedParams = {
