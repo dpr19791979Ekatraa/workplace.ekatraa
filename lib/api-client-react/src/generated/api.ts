@@ -39,6 +39,7 @@ import type {
   GetActivityFeedParams,
   GetAttendanceSummaryParams,
   GetProductivityAnalyticsParams,
+  GetReimbursementSummary200,
   GroupConversationInput,
   HealthStatus,
   Leave,
@@ -51,6 +52,7 @@ import type {
   ListMeetingsParams,
   ListNotificationsParams,
   ListProjectsParams,
+  ListReimbursementsParams,
   ListTasksParams,
   ListUsersParams,
   Meeting,
@@ -61,6 +63,9 @@ import type {
   ProjectInput,
   ProjectUpdate,
   ProjectsSummary,
+  Reimbursement,
+  ReimbursementInput,
+  ReimbursementStatusUpdate,
   Task,
   TaskInput,
   TaskUpdate,
@@ -3150,6 +3155,310 @@ export const useUpdateLeaveStatus = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getUpdateLeaveStatusMutationOptions(options));
     }
+
+export const getListReimbursementsUrl = (params?: ListReimbursementsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/reimbursements?${stringifiedParams}` : `/api/reimbursements`
+}
+
+/**
+ * @summary List reimbursement requests
+ */
+export const listReimbursements = async (params?: ListReimbursementsParams, options?: RequestInit): Promise<Reimbursement[]> => {
+
+  return customFetch<Reimbursement[]>(getListReimbursementsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListReimbursementsQueryKey = (params?: ListReimbursementsParams,) => {
+    return [
+    `/api/reimbursements`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListReimbursementsQueryOptions = <TData = Awaited<ReturnType<typeof listReimbursements>>, TError = ErrorType<unknown>>(params?: ListReimbursementsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listReimbursements>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListReimbursementsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listReimbursements>>> = ({ signal }) => listReimbursements(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listReimbursements>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListReimbursementsQueryResult = NonNullable<Awaited<ReturnType<typeof listReimbursements>>>
+export type ListReimbursementsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List reimbursement requests
+ */
+
+export function useListReimbursements<TData = Awaited<ReturnType<typeof listReimbursements>>, TError = ErrorType<unknown>>(
+ params?: ListReimbursementsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listReimbursements>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListReimbursementsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateReimbursementUrl = () => {
+
+
+
+
+  return `/api/reimbursements`
+}
+
+/**
+ * @summary Submit reimbursement request
+ */
+export const createReimbursement = async (reimbursementInput: ReimbursementInput, options?: RequestInit): Promise<Reimbursement> => {
+
+  return customFetch<Reimbursement>(getCreateReimbursementUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      reimbursementInput,)
+  }
+);}
+
+
+
+
+export const getCreateReimbursementMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReimbursement>>, TError,{data: BodyType<ReimbursementInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createReimbursement>>, TError,{data: BodyType<ReimbursementInput>}, TContext> => {
+
+const mutationKey = ['createReimbursement'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createReimbursement>>, {data: BodyType<ReimbursementInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createReimbursement(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateReimbursementMutationResult = NonNullable<Awaited<ReturnType<typeof createReimbursement>>>
+    export type CreateReimbursementMutationBody = BodyType<ReimbursementInput>
+    export type CreateReimbursementMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Submit reimbursement request
+ */
+export const useCreateReimbursement = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReimbursement>>, TError,{data: BodyType<ReimbursementInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createReimbursement>>,
+        TError,
+        {data: BodyType<ReimbursementInput>},
+        TContext
+      > => {
+      return useMutation(getCreateReimbursementMutationOptions(options));
+    }
+
+export const getUpdateReimbursementStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/reimbursements/${id}/status`
+}
+
+/**
+ * @summary Approve, reject, mark paid, or cancel a reimbursement
+ */
+export const updateReimbursementStatus = async (id: number,
+    reimbursementStatusUpdate: ReimbursementStatusUpdate, options?: RequestInit): Promise<Reimbursement> => {
+
+  return customFetch<Reimbursement>(getUpdateReimbursementStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      reimbursementStatusUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateReimbursementStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateReimbursementStatus>>, TError,{id: number;data: BodyType<ReimbursementStatusUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateReimbursementStatus>>, TError,{id: number;data: BodyType<ReimbursementStatusUpdate>}, TContext> => {
+
+const mutationKey = ['updateReimbursementStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateReimbursementStatus>>, {id: number;data: BodyType<ReimbursementStatusUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateReimbursementStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateReimbursementStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateReimbursementStatus>>>
+    export type UpdateReimbursementStatusMutationBody = BodyType<ReimbursementStatusUpdate>
+    export type UpdateReimbursementStatusMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Approve, reject, mark paid, or cancel a reimbursement
+ */
+export const useUpdateReimbursementStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateReimbursementStatus>>, TError,{id: number;data: BodyType<ReimbursementStatusUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateReimbursementStatus>>,
+        TError,
+        {id: number;data: BodyType<ReimbursementStatusUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateReimbursementStatusMutationOptions(options));
+    }
+
+export const getGetReimbursementSummaryUrl = () => {
+
+
+
+
+  return `/api/reimbursements/summary`
+}
+
+/**
+ * @summary Get current user's reimbursement totals
+ */
+export const getReimbursementSummary = async ( options?: RequestInit): Promise<GetReimbursementSummary200> => {
+
+  return customFetch<GetReimbursementSummary200>(getGetReimbursementSummaryUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetReimbursementSummaryQueryKey = () => {
+    return [
+    `/api/reimbursements/summary`
+    ] as const;
+    }
+
+
+export const getGetReimbursementSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getReimbursementSummary>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getReimbursementSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetReimbursementSummaryQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getReimbursementSummary>>> = ({ signal }) => getReimbursementSummary({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getReimbursementSummary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetReimbursementSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getReimbursementSummary>>>
+export type GetReimbursementSummaryQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get current user's reimbursement totals
+ */
+
+export function useGetReimbursementSummary<TData = Awaited<ReturnType<typeof getReimbursementSummary>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getReimbursementSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetReimbursementSummaryQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
 export const getGetDashboardAnalyticsUrl = () => {
 

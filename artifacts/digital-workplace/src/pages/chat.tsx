@@ -176,7 +176,7 @@ function NewChatDialog({ meId, onCreated }: { meId?: number; onCreated: (id: num
 
 function MessagePane({ conversationId, meId }: { conversationId: number; meId?: number }) {
   const { data: messages, isLoading } = useListMessages(conversationId, {
-    query: { refetchInterval: 3000 },
+    query: { queryKey: getListMessagesQueryKey(conversationId), refetchInterval: 3000 },
   });
   const send = useSendMessage();
   const markRead = useMarkConversationRead();
@@ -267,7 +267,7 @@ export default function ChatPage() {
   const { data: currentUser } = useGetCurrentUser();
   const meId = currentUser?.id;
   const { data: conversations, isLoading } = useListConversations({
-    query: { refetchInterval: 5000 },
+    query: { queryKey: getListConversationsQueryKey(), refetchInterval: 5000 },
   });
   const qc = useQueryClient();
   const [selectedId, setSelectedId] = useState<number | null>(null);

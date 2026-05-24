@@ -910,6 +910,96 @@ export const UpdateLeaveStatusResponse = zod.object({
 
 
 /**
+ * @summary List reimbursement requests
+ */
+export const ListReimbursementsQueryParams = zod.object({
+  "userId": zod.coerce.number().optional(),
+  "status": zod.coerce.string().optional()
+})
+
+export const ListReimbursementsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string().optional(),
+  "userAvatar": zod.string().nullish(),
+  "category": zod.enum(['travel', 'meals', 'accommodation', 'supplies', 'software', 'training', 'client', 'other']),
+  "amount": zod.number(),
+  "currency": zod.string(),
+  "expenseDate": zod.coerce.date(),
+  "description": zod.string().nullish(),
+  "receiptUrl": zod.string().nullish(),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'paid', 'cancelled']),
+  "reviewedById": zod.number().nullish(),
+  "reviewerName": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "reviewNotes": zod.string().nullish(),
+  "createdAt": zod.coerce.date()
+})
+export const ListReimbursementsResponse = zod.array(ListReimbursementsResponseItem)
+
+
+/**
+ * @summary Submit reimbursement request
+ */
+export const createReimbursementBodyAmountMin = 0.01;
+
+export const createReimbursementBodyCurrencyDefault = `INR`;
+
+export const CreateReimbursementBody = zod.object({
+  "category": zod.enum(['travel', 'meals', 'accommodation', 'supplies', 'software', 'training', 'client', 'other']),
+  "amount": zod.number().min(createReimbursementBodyAmountMin),
+  "currency": zod.string().default(createReimbursementBodyCurrencyDefault),
+  "expenseDate": zod.coerce.date(),
+  "description": zod.string().nullish(),
+  "receiptUrl": zod.string().nullish()
+})
+
+
+/**
+ * @summary Approve, reject, mark paid, or cancel a reimbursement
+ */
+export const UpdateReimbursementStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateReimbursementStatusBody = zod.object({
+  "status": zod.enum(['approved', 'rejected', 'paid', 'cancelled']),
+  "reviewNotes": zod.string().nullish()
+})
+
+export const UpdateReimbursementStatusResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string().optional(),
+  "userAvatar": zod.string().nullish(),
+  "category": zod.enum(['travel', 'meals', 'accommodation', 'supplies', 'software', 'training', 'client', 'other']),
+  "amount": zod.number(),
+  "currency": zod.string(),
+  "expenseDate": zod.coerce.date(),
+  "description": zod.string().nullish(),
+  "receiptUrl": zod.string().nullish(),
+  "status": zod.enum(['pending', 'approved', 'rejected', 'paid', 'cancelled']),
+  "reviewedById": zod.number().nullish(),
+  "reviewerName": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "reviewNotes": zod.string().nullish(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get current user's reimbursement totals
+ */
+export const GetReimbursementSummaryResponse = zod.object({
+  "pendingCount": zod.number(),
+  "pendingAmount": zod.number(),
+  "approvedAmount": zod.number(),
+  "paidAmount": zod.number(),
+  "currency": zod.string()
+})
+
+
+/**
  * @summary Get main dashboard analytics
  */
 export const GetDashboardAnalyticsResponse = zod.object({

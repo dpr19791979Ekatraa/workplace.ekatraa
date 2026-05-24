@@ -896,6 +896,99 @@ export interface GroupConversationInput {
   memberIds: number[];
 }
 
+export type ReimbursementCategory = typeof ReimbursementCategory[keyof typeof ReimbursementCategory];
+
+
+export const ReimbursementCategory = {
+  travel: 'travel',
+  meals: 'meals',
+  accommodation: 'accommodation',
+  supplies: 'supplies',
+  software: 'software',
+  training: 'training',
+  client: 'client',
+  other: 'other',
+} as const;
+
+export type ReimbursementStatus = typeof ReimbursementStatus[keyof typeof ReimbursementStatus];
+
+
+export const ReimbursementStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+  paid: 'paid',
+  cancelled: 'cancelled',
+} as const;
+
+export interface Reimbursement {
+  id: number;
+  userId: number;
+  userName?: string;
+  /** @nullable */
+  userAvatar?: string | null;
+  category: ReimbursementCategory;
+  amount: number;
+  currency: string;
+  expenseDate: string;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  receiptUrl?: string | null;
+  status: ReimbursementStatus;
+  /** @nullable */
+  reviewedById?: number | null;
+  /** @nullable */
+  reviewerName?: string | null;
+  /** @nullable */
+  reviewedAt?: string | null;
+  /** @nullable */
+  reviewNotes?: string | null;
+  createdAt: string;
+}
+
+export type ReimbursementInputCategory = typeof ReimbursementInputCategory[keyof typeof ReimbursementInputCategory];
+
+
+export const ReimbursementInputCategory = {
+  travel: 'travel',
+  meals: 'meals',
+  accommodation: 'accommodation',
+  supplies: 'supplies',
+  software: 'software',
+  training: 'training',
+  client: 'client',
+  other: 'other',
+} as const;
+
+export interface ReimbursementInput {
+  category: ReimbursementInputCategory;
+  /** @minimum 0.01 */
+  amount: number;
+  currency?: string;
+  expenseDate: string;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  receiptUrl?: string | null;
+}
+
+export type ReimbursementStatusUpdateStatus = typeof ReimbursementStatusUpdateStatus[keyof typeof ReimbursementStatusUpdateStatus];
+
+
+export const ReimbursementStatusUpdateStatus = {
+  approved: 'approved',
+  rejected: 'rejected',
+  paid: 'paid',
+  cancelled: 'cancelled',
+} as const;
+
+export interface ReimbursementStatusUpdate {
+  status: ReimbursementStatusUpdateStatus;
+  /** @nullable */
+  reviewNotes?: string | null;
+}
+
 export type ListUsersParams = {
 department?: string;
 role?: string;
@@ -945,6 +1038,19 @@ year?: number;
 export type ListLeavesParams = {
 userId?: number;
 status?: string;
+};
+
+export type ListReimbursementsParams = {
+userId?: number;
+status?: string;
+};
+
+export type GetReimbursementSummary200 = {
+  pendingCount: number;
+  pendingAmount: number;
+  approvedAmount: number;
+  paidAmount: number;
+  currency: string;
 };
 
 export type GetActivityFeedParams = {

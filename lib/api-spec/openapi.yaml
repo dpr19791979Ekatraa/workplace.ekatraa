@@ -33,6 +33,8 @@ tags:
     description: Group calls and scheduled meetings
   - name: notifications
     description: In-app notifications
+  - name: reimbursements
+    description: Employee expense reimbursements
 
 paths:
   /healthz:
@@ -797,6 +799,90 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Leave"
+
+  # ── Reimbursements ─────────────────────────────────────────────────────────
+  /reimbursements:
+    get:
+      operationId: listReimbursements
+      tags: [reimbursements]
+      summary: List reimbursement requests
+      parameters:
+        - name: userId
+          in: query
+          schema: { type: integer }
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Reimbursement requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reimbursement"
+    post:
+      operationId: createReimbursement
+      tags: [reimbursements]
+      summary: Submit reimbursement request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReimbursementInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reimbursement"
+
+  /reimbursements/{id}/status:
+    patch:
+      operationId: updateReimbursementStatus
+      tags: [reimbursements]
+      summary: Approve, reject, mark paid, or cancel a reimbursement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReimbursementStatusUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reimbursement"
+
+  /reimbursements/summary:
+    get:
+      operationId: getReimbursementSummary
+      tags: [reimbursements]
+      summary: Get current user's reimbursement totals
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [pendingCount, pendingAmount, approvedAmount, paidAmount, currency]
+                properties:
+                  pendingCount: { type: integer }
+                  pendingAmount: { type: number }
+                  approvedAmount: { type: number }
+                  paidAmount: { type: number }
+                  currency: { type: string }
 
   # ── Analytics ──────────────────────────────────────────────────────────────
   /analytics/dashboard:
@@ -2074,3 +2160,51 @@ components:
           type: array
           items: { type: integer }
           minItems: 1
+
+    # ── Reimbursements ─────────────────────────────────────────────────────
+    Reimbursement:
+      type: object
+      required: [id, userId, category, amount, currency, expenseDate, status, createdAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        userName: { type: string }
+        userAvatar: { type: ["string", "null"] }
+        category:
+          type: string
+          enum: [travel, meals, accommodation, supplies, software, training, client, other]
+        amount: { type: number }
+        currency: { type: string }
+        expenseDate: { type: string, format: date }
+        description: { type: ["string", "null"] }
+        receiptUrl: { type: ["string", "null"] }
+        status:
+          type: string
+          enum: [pending, approved, rejected, paid, cancelled]
+        reviewedById: { type: ["integer", "null"] }
+        reviewerName: { type: ["string", "null"] }
+        reviewedAt: { type: ["string", "null"], format: date-time }
+        reviewNotes: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+
+    ReimbursementInput:
+      type: object
+      required: [category, amount, expenseDate]
+      properties:
+        category:
+          type: string
+          enum: [travel, meals, accommodation, supplies, software, training, client, other]
+        amount: { type: number, minimum: 0.01 }
+        currency: { type: string, default: "INR" }
+        expenseDate: { type: string, format: date }
+        description: { type: ["string", "null"] }
+        receiptUrl: { type: ["string", "null"] }
+
+    ReimbursementStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [approved, rejected, paid, cancelled]
+        reviewNotes: { type: ["string", "null"] }
