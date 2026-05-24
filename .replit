@@ -33,3 +33,10 @@ externalPort = 3000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+INTERAKT_API_KEY = "bVNEd3U3QjlIdk43VWx0TkMwd1RUb2p5MmhxWjlwSGp2REx0NGs4LURUdzo="
+OWNER_WHATSAPP_COUNTRY_CODE = "+91"
+OWNER_WHATSAPP_NUMBER = "9830214489"
