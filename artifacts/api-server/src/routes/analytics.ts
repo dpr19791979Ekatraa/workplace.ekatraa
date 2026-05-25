@@ -112,6 +112,7 @@ router.get("/analytics/activity", requireAuth, async (req, res): Promise<void> =
   }
   const { limit = 20 } = parsed.data;
   const logs = await db.select().from(activityLogTable)
+    .where(sql`${activityLogTable.type} NOT ILIKE 'chat_%' AND ${activityLogTable.type} NOT ILIKE 'message_%'`)
     .orderBy(desc(activityLogTable.createdAt))
     .limit(limit);
 

@@ -213,7 +213,6 @@ function CreateLeaveDialog({ currentUserId }: { currentUserId: number }) {
                     <SelectItem value="maternity">Maternity leave</SelectItem>
                     <SelectItem value="paternity">Paternity leave</SelectItem>
                     <SelectItem value="bereavement">Bereavement leave</SelectItem>
-                    <SelectItem value="unpaid">Unpaid leave</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

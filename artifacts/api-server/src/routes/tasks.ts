@@ -72,9 +72,22 @@ router.post("/tasks", requireAuth, async (req, res): Promise<void> => {
     return;
   }
   const user = (req as any).currentUser;
+  if (parsed.data.status === "done") {
+    const notes = (parsed.data as any).completionNotes;
+    const fileUrl = (parsed.data as any).completionFileUrl;
+    if (!notes || !String(notes).trim()) {
+      res.status(400).json({ error: "Completion notes are required to create a task as done" });
+      return;
+    }
+    if (!fileUrl || !String(fileUrl).trim()) {
+      res.status(400).json({ error: "A completion file is required to create a task as done" });
+      return;
+    }
+  }
   const [task] = await db.insert(tasksTable).values({
     ...parsed.data,
     estimatedHours: parsed.data.estimatedHours != null ? String(parsed.data.estimatedHours) : null,
+    completedAt: parsed.data.status === "done" ? new Date() : null,
   }).returning();
   await logActivity(user.id, "task_created", `Created task "${task.title}"`, task.id, "task");
   if (task.assigneeId && task.assigneeId !== user.id) {
@@ -119,13 +132,30 @@ router.patch("/tasks/:id", requireAuth, async (req, res): Promise<void> => {
   if (parsed.data.estimatedHours != null) updateData.estimatedHours = String(parsed.data.estimatedHours);
   if (parsed.data.loggedHours != null) updateData.loggedHours = String(parsed.data.loggedHours);
 
-  const [before] = await db.select({ assigneeId: tasksTable.assigneeId }).from(tasksTable).where(eq(tasksTable.id, params.data.id)).limit(1);
+  const [before] = await db.select({ assigneeId: tasksTable.assigneeId, status: tasksTable.status, completionNotes: tasksTable.completionNotes, completionFileUrl: tasksTable.completionFileUrl }).from(tasksTable).where(eq(tasksTable.id, params.data.id)).limit(1);
+
+  if (parsed.data.status === "done" && before?.status !== "done") {
+    const notes = (parsed.data as any).completionNotes ?? before?.completionNotes;
+    const fileUrl = (parsed.data as any).completionFileUrl ?? before?.completionFileUrl;
+    if (!notes || !String(notes).trim()) {
+      res.status(400).json({ error: "Completion notes are required to mark a task as done" });
+      return;
+    }
+    if (!fileUrl || !String(fileUrl).trim()) {
+      res.status(400).json({ error: "A completion file is required to mark a task as done" });
+      return;
+    }
+    updateData.completionNotes = notes;
+    updateData.completionFileUrl = fileUrl;
+    updateData.completedAt = new Date();
+  }
+
   const [updated] = await db.update(tasksTable).set(updateData).where(eq(tasksTable.id, params.data.id)).returning();
   if (!updated) {
     res.status(404).json({ error: "Task not found" });
     return;
   }
-  if (updated.status === "done") {
+  if (updated.status === "done" && before?.status !== "done") {
     await logActivity(user.id, "task_completed", `Completed task "${updated.title}"`, updated.id, "task");
   }
   if (updated.assigneeId && updated.assigneeId !== user.id && updated.assigneeId !== before?.assigneeId) {

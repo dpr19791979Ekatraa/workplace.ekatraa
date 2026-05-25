@@ -32,5 +32,11 @@ export interface Task {
   /** @nullable */
   loggedHours?: number | null;
   tags?: string[];
+  /** @nullable */
+  completionNotes?: string | null;
+  /** @nullable */
+  completionFileUrl?: string | null;
+  /** @nullable */
+  completedAt?: Date | null;
   createdAt: Date;
 }

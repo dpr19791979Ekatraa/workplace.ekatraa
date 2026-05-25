@@ -15,12 +15,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
   useListTasks, useCreateTask, useUpdateTask, useDeleteTask,
-  useListProjects, useListUsers,
+  useListProjects, useListUsers, useRequestUploadUrl,
   getListTasksQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { CheckSquare, Trash2, Plus } from "lucide-react";
+import { CheckSquare, Trash2, Plus, Paperclip } from "lucide-react";
+import { DialogFooter } from "@/components/ui/dialog";
 
 const createTaskSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -208,9 +209,104 @@ const priorityColors: Record<string, string> = {
   critical: "border-red-200 text-red-600",
 };
 
+function CompleteTaskDialog({
+  task, open, onOpenChange,
+}: { task: any; open: boolean; onOpenChange: (v: boolean) => void }) {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const updateTask = useUpdateTask();
+  const requestUploadUrl = useRequestUploadUrl();
+  const [notes, setNotes] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    if (!notes.trim()) {
+      toast({ title: "Completion notes are required", variant: "destructive" });
+      return;
+    }
+    if (!file) {
+      toast({ title: "Please attach a completion file", variant: "destructive" });
+      return;
+    }
+    try {
+      setBusy(true);
+      const presign = await requestUploadUrl.mutateAsync({
+        data: { name: file.name, size: file.size, contentType: file.type || "application/octet-stream" } as any,
+      });
+      const { uploadURL, objectPath } = presign as any;
+      const putRes = await fetch(uploadURL, {
+        method: "PUT",
+        headers: { "Content-Type": file.type || "application/octet-stream" },
+        body: file,
+      });
+      if (!putRes.ok) throw new Error("Upload failed");
+      await updateTask.mutateAsync({
+        id: task.id,
+        data: { status: "done", completionNotes: notes.trim(), completionFileUrl: objectPath } as any,
+      });
+      qc.invalidateQueries({ queryKey: getListTasksQueryKey() });
+      toast({ title: "Task marked as done" });
+      onOpenChange(false);
+      setNotes("");
+      setFile(null);
+    } catch (err: any) {
+      toast({ title: err?.response?.data?.error ?? "Failed to complete task", variant: "destructive" });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!busy) onOpenChange(v); }}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Complete task</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm font-medium text-foreground">{task?.title}</p>
+            <p className="text-xs text-muted-foreground">Please add completion notes and attach proof of work.</p>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Completion notes <span className="text-destructive">*</span></label>
+            <Textarea
+              rows={4}
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="Describe what was done..."
+              data-testid="input-completion-notes"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Completion file <span className="text-destructive">*</span></label>
+            <Input
+              type="file"
+              onChange={e => setFile(e.target.files?.[0] ?? null)}
+              data-testid="input-completion-file"
+            />
+            {file && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Paperclip className="w-3 h-3" /> {file.name} ({(file.size / 1024).toFixed(0)} KB)
+              </p>
+            )}
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" disabled={busy} onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button type="button" onClick={submit} disabled={busy} data-testid="confirm-complete-task">
+            {busy ? "Submitting..." : "Mark as Done"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function TasksPage() {
   const [status, setStatus] = useState("all");
   const [priority, setPriority] = useState("all");
+  const [completingTask, setCompletingTask] = useState<any | null>(null);
   const qc = useQueryClient();
   const { toast } = useToast();
   const updateTask = useUpdateTask();
@@ -225,8 +321,12 @@ export default function TasksPage() {
     query: { queryKey: getListTasksQueryKey(params) }
   });
 
-  const handleStatusChange = (taskId: number, newStatus: string) => {
-    updateTask.mutate({ id: taskId, data: { status: newStatus as any } }, {
+  const handleStatusChange = (task: any, newStatus: string) => {
+    if (newStatus === "done" && task.status !== "done") {
+      setCompletingTask(task);
+      return;
+    }
+    updateTask.mutate({ id: task.id, data: { status: newStatus as any } }, {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getListTasksQueryKey() });
         toast({ title: "Task updated" });
@@ -321,7 +421,7 @@ export default function TasksPage() {
                         {task.priority}
                       </Badge>
 
-                      <Select value={task.status} onValueChange={(v) => handleStatusChange(task.id, v)}>
+                      <Select value={task.status} onValueChange={(v) => handleStatusChange(task, v)}>
                         <SelectTrigger className={`h-7 text-xs px-2 py-0 border-0 w-auto ${statusColors[task.status] ?? ""}`} data-testid={`task-status-${task.id}`}>
                           <SelectValue />
                         </SelectTrigger>
@@ -351,6 +451,13 @@ export default function TasksPage() {
           </div>
         )}
       </div>
+      {completingTask && (
+        <CompleteTaskDialog
+          task={completingTask}
+          open={!!completingTask}
+          onOpenChange={(v) => { if (!v) setCompletingTask(null); }}
+        />
+      )}
     </Layout>
   );
 }

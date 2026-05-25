@@ -47,6 +47,14 @@ export const ListUsersResponse = zod.object({
   "bio": zod.string().nullish(),
   "birthday": zod.coerce.date().nullish(),
   "workAnniversary": zod.coerce.date().nullish(),
+  "marriageAnniversary": zod.coerce.date().nullish(),
+  "maritalStatus": zod.string().nullish(),
+  "spouseName": zod.string().nullish(),
+  "childrenInfo": zod.string().nullish(),
+  "emergencyContactName": zod.string().nullish(),
+  "emergencyContactPhone": zod.string().nullish(),
+  "emergencyContactRelation": zod.string().nullish(),
+  "bloodGroup": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']),
   "createdAt": zod.coerce.date(),
   "lastLoginAt": zod.coerce.date().nullish()
@@ -77,7 +85,15 @@ export const CreateUserBody = zod.object({
   "linkedinUrl": zod.string().nullish(),
   "bio": zod.string().nullish(),
   "birthday": zod.coerce.date().nullish(),
-  "workAnniversary": zod.coerce.date().nullish()
+  "workAnniversary": zod.coerce.date().nullish(),
+  "marriageAnniversary": zod.coerce.date().nullish(),
+  "maritalStatus": zod.string().nullish(),
+  "spouseName": zod.string().nullish(),
+  "childrenInfo": zod.string().nullish(),
+  "emergencyContactName": zod.string().nullish(),
+  "emergencyContactPhone": zod.string().nullish(),
+  "emergencyContactRelation": zod.string().nullish(),
+  "bloodGroup": zod.string().nullish()
 })
 
 
@@ -100,6 +116,14 @@ export const GetCurrentUserResponse = zod.object({
   "bio": zod.string().nullish(),
   "birthday": zod.coerce.date().nullish(),
   "workAnniversary": zod.coerce.date().nullish(),
+  "marriageAnniversary": zod.coerce.date().nullish(),
+  "maritalStatus": zod.string().nullish(),
+  "spouseName": zod.string().nullish(),
+  "childrenInfo": zod.string().nullish(),
+  "emergencyContactName": zod.string().nullish(),
+  "emergencyContactPhone": zod.string().nullish(),
+  "emergencyContactRelation": zod.string().nullish(),
+  "bloodGroup": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']),
   "createdAt": zod.coerce.date(),
   "lastLoginAt": zod.coerce.date().nullish()
@@ -121,6 +145,14 @@ export const UpdateCurrentUserBody = zod.object({
   "bio": zod.string().nullish(),
   "birthday": zod.coerce.date().nullish(),
   "workAnniversary": zod.coerce.date().nullish(),
+  "marriageAnniversary": zod.coerce.date().nullish(),
+  "maritalStatus": zod.string().nullish(),
+  "spouseName": zod.string().nullish(),
+  "childrenInfo": zod.string().nullish(),
+  "emergencyContactName": zod.string().nullish(),
+  "emergencyContactPhone": zod.string().nullish(),
+  "emergencyContactRelation": zod.string().nullish(),
+  "bloodGroup": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']).optional()
 })
 
@@ -140,6 +172,14 @@ export const UpdateCurrentUserResponse = zod.object({
   "bio": zod.string().nullish(),
   "birthday": zod.coerce.date().nullish(),
   "workAnniversary": zod.coerce.date().nullish(),
+  "marriageAnniversary": zod.coerce.date().nullish(),
+  "maritalStatus": zod.string().nullish(),
+  "spouseName": zod.string().nullish(),
+  "childrenInfo": zod.string().nullish(),
+  "emergencyContactName": zod.string().nullish(),
+  "emergencyContactPhone": zod.string().nullish(),
+  "emergencyContactRelation": zod.string().nullish(),
+  "bloodGroup": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']),
   "createdAt": zod.coerce.date(),
   "lastLoginAt": zod.coerce.date().nullish()
@@ -169,6 +209,14 @@ export const GetUserResponse = zod.object({
   "bio": zod.string().nullish(),
   "birthday": zod.coerce.date().nullish(),
   "workAnniversary": zod.coerce.date().nullish(),
+  "marriageAnniversary": zod.coerce.date().nullish(),
+  "maritalStatus": zod.string().nullish(),
+  "spouseName": zod.string().nullish(),
+  "childrenInfo": zod.string().nullish(),
+  "emergencyContactName": zod.string().nullish(),
+  "emergencyContactPhone": zod.string().nullish(),
+  "emergencyContactRelation": zod.string().nullish(),
+  "bloodGroup": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']),
   "createdAt": zod.coerce.date(),
   "lastLoginAt": zod.coerce.date().nullish()
@@ -194,6 +242,14 @@ export const UpdateUserBody = zod.object({
   "bio": zod.string().nullish(),
   "birthday": zod.coerce.date().nullish(),
   "workAnniversary": zod.coerce.date().nullish(),
+  "marriageAnniversary": zod.coerce.date().nullish(),
+  "maritalStatus": zod.string().nullish(),
+  "spouseName": zod.string().nullish(),
+  "childrenInfo": zod.string().nullish(),
+  "emergencyContactName": zod.string().nullish(),
+  "emergencyContactPhone": zod.string().nullish(),
+  "emergencyContactRelation": zod.string().nullish(),
+  "bloodGroup": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']).optional()
 })
 
@@ -213,6 +269,14 @@ export const UpdateUserResponse = zod.object({
   "bio": zod.string().nullish(),
   "birthday": zod.coerce.date().nullish(),
   "workAnniversary": zod.coerce.date().nullish(),
+  "marriageAnniversary": zod.coerce.date().nullish(),
+  "maritalStatus": zod.string().nullish(),
+  "spouseName": zod.string().nullish(),
+  "childrenInfo": zod.string().nullish(),
+  "emergencyContactName": zod.string().nullish(),
+  "emergencyContactPhone": zod.string().nullish(),
+  "emergencyContactRelation": zod.string().nullish(),
+  "bloodGroup": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']),
   "createdAt": zod.coerce.date(),
   "lastLoginAt": zod.coerce.date().nullish()
@@ -459,6 +523,9 @@ export const ListTasksResponseItem = zod.object({
   "estimatedHours": zod.number().nullish(),
   "loggedHours": zod.number().nullish(),
   "tags": zod.array(zod.string()).optional(),
+  "completionNotes": zod.string().nullish(),
+  "completionFileUrl": zod.string().nullish(),
+  "completedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date()
 })
 export const ListTasksResponse = zod.array(ListTasksResponseItem)
@@ -502,6 +569,9 @@ export const GetTaskResponse = zod.object({
   "estimatedHours": zod.number().nullish(),
   "loggedHours": zod.number().nullish(),
   "tags": zod.array(zod.string()).optional(),
+  "completionNotes": zod.string().nullish(),
+  "completionFileUrl": zod.string().nullish(),
+  "completedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date()
 })
 
@@ -522,7 +592,9 @@ export const UpdateTaskBody = zod.object({
   "dueDate": zod.coerce.date().nullish(),
   "estimatedHours": zod.number().nullish(),
   "loggedHours": zod.number().nullish(),
-  "tags": zod.array(zod.string()).optional()
+  "tags": zod.array(zod.string()).optional(),
+  "completionNotes": zod.string().nullish(),
+  "completionFileUrl": zod.string().nullish()
 })
 
 export const UpdateTaskResponse = zod.object({
@@ -540,6 +612,9 @@ export const UpdateTaskResponse = zod.object({
   "estimatedHours": zod.number().nullish(),
   "loggedHours": zod.number().nullish(),
   "tags": zod.array(zod.string()).optional(),
+  "completionNotes": zod.string().nullish(),
+  "completionFileUrl": zod.string().nullish(),
+  "completedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date()
 })
 
@@ -922,7 +997,7 @@ export const ListReimbursementsResponseItem = zod.object({
   "userId": zod.number(),
   "userName": zod.string().optional(),
   "userAvatar": zod.string().nullish(),
-  "category": zod.enum(['travel', 'meals', 'accommodation', 'supplies', 'software', 'training', 'client', 'other']),
+  "category": zod.enum(['travel', 'meals', 'accommodation', 'supplies', 'software', 'training', 'client', 'phone_bill', 'other']),
   "amount": zod.number(),
   "currency": zod.string(),
   "expenseDate": zod.coerce.date(),
@@ -945,13 +1020,14 @@ export const createReimbursementBodyAmountMin = 0.01;
 
 export const createReimbursementBodyCurrencyDefault = `INR`;
 
+
 export const CreateReimbursementBody = zod.object({
-  "category": zod.enum(['travel', 'meals', 'accommodation', 'supplies', 'software', 'training', 'client', 'other']),
+  "category": zod.enum(['travel', 'meals', 'accommodation', 'supplies', 'software', 'training', 'client', 'phone_bill', 'other']),
   "amount": zod.number().min(createReimbursementBodyAmountMin),
   "currency": zod.string().default(createReimbursementBodyCurrencyDefault),
   "expenseDate": zod.coerce.date(),
   "description": zod.string().nullish(),
-  "receiptUrl": zod.string().nullish()
+  "receiptUrl": zod.string().min(1)
 })
 
 
@@ -972,7 +1048,7 @@ export const UpdateReimbursementStatusResponse = zod.object({
   "userId": zod.number(),
   "userName": zod.string().optional(),
   "userAvatar": zod.string().nullish(),
-  "category": zod.enum(['travel', 'meals', 'accommodation', 'supplies', 'software', 'training', 'client', 'other']),
+  "category": zod.enum(['travel', 'meals', 'accommodation', 'supplies', 'software', 'training', 'client', 'phone_bill', 'other']),
   "amount": zod.number(),
   "currency": zod.string(),
   "expenseDate": zod.coerce.date(),
@@ -1452,6 +1528,14 @@ export const GetDashboardAnalyticsResponse = zod.object({
   "bio": zod.string().nullish(),
   "birthday": zod.coerce.date().nullish(),
   "workAnniversary": zod.coerce.date().nullish(),
+  "marriageAnniversary": zod.coerce.date().nullish(),
+  "maritalStatus": zod.string().nullish(),
+  "spouseName": zod.string().nullish(),
+  "childrenInfo": zod.string().nullish(),
+  "emergencyContactName": zod.string().nullish(),
+  "emergencyContactPhone": zod.string().nullish(),
+  "emergencyContactRelation": zod.string().nullish(),
+  "bloodGroup": zod.string().nullish(),
   "status": zod.enum(['active', 'inactive', 'blocked']),
   "createdAt": zod.coerce.date(),
   "lastLoginAt": zod.coerce.date().nullish()
@@ -1471,6 +1555,9 @@ export const GetDashboardAnalyticsResponse = zod.object({
   "estimatedHours": zod.number().nullish(),
   "loggedHours": zod.number().nullish(),
   "tags": zod.array(zod.string()).optional(),
+  "completionNotes": zod.string().nullish(),
+  "completionFileUrl": zod.string().nullish(),
+  "completedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date()
 })).optional()
 })

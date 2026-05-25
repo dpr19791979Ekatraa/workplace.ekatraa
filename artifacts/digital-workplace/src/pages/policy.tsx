@@ -95,6 +95,22 @@ const policies = [
     ],
   },
   {
+    id: "insurance",
+    title: "Insurance Policies",
+    icon: Heart,
+    category: "HR",
+    updated: "May 2026",
+    summary: "Group health, accident, and life insurance benefits.",
+    sections: [
+      { heading: "Group health insurance", body: "All full-time employees and their immediate dependents (spouse and up to 2 children) are covered under the group health insurance plan from the date of joining. Sum insured: ₹5,00,000 per family per year on a floater basis." },
+      { heading: "Personal accident cover", body: "Every employee is covered for personal accident insurance up to ₹10,00,000, covering accidental death and permanent disability, 24x7 worldwide." },
+      { heading: "Group term life insurance", body: "Group term life cover of 3x annual CTC (up to ₹50,00,000) is provided. The nominee on record will receive the benefit in the event of the employee's death during service." },
+      { heading: "Hospitalisation & cashless network", body: "Use the TPA network of cashless hospitals for planned and emergency admissions. For non-network hospitals, submit original bills + discharge summary to HR within 30 days for reimbursement." },
+      { heading: "Adding / removing dependents", body: "New marriages, births, or changes in dependents must be reported to HR within 30 days of the event to update the insurance records. Mid-year additions follow insurer rules." },
+      { heading: "Claims & support", body: "For any insurance claim or query, reach out to HR with your employee ID. HR will share the TPA / insurer contact and help with documentation." },
+    ],
+  },
+  {
     id: "referral",
     title: "Employee Referral",
     icon: Users,

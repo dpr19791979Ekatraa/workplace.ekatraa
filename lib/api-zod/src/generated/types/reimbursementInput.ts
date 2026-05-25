@@ -15,6 +15,6 @@ export interface ReimbursementInput {
   expenseDate: Date;
   /** @nullable */
   description?: string | null;
-  /** @nullable */
-  receiptUrl?: string | null;
+  /** @minLength 1 */
+  receiptUrl: string;
 }

@@ -30,6 +30,9 @@ export const tasksTable = pgTable("tasks", {
   estimatedHours: text("estimated_hours"),
   loggedHours: text("logged_hours"),
   tags: text("tags").array(),
+  completionNotes: text("completion_notes"),
+  completionFileUrl: text("completion_file_url"),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

@@ -23,4 +23,8 @@ export interface TaskUpdate {
   /** @nullable */
   loggedHours?: number | null;
   tags?: string[];
+  /** @nullable */
+  completionNotes?: string | null;
+  /** @nullable */
+  completionFileUrl?: string | null;
 }

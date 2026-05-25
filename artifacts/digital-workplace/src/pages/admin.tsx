@@ -59,6 +59,15 @@ const editEmployeeSchema = z.object({
   departmentId: z.number().optional(),
   birthday: z.string().optional(),
   workAnniversary: z.string().optional(),
+  marriageAnniversary: z.string().optional(),
+  phone: z.string().optional(),
+  maritalStatus: z.string().optional(),
+  spouseName: z.string().optional(),
+  childrenInfo: z.string().optional(),
+  bloodGroup: z.string().optional(),
+  emergencyContactName: z.string().optional(),
+  emergencyContactPhone: z.string().optional(),
+  emergencyContactRelation: z.string().optional(),
   status: z.string(),
 });
 
@@ -258,6 +267,15 @@ function EditEmployeeDialog({ user, departments }: { user: any; departments: any
       departmentId: user.departmentId ?? undefined,
       birthday: user.birthday ?? "",
       workAnniversary: user.workAnniversary ?? "",
+      marriageAnniversary: user.marriageAnniversary ?? "",
+      phone: user.phone ?? "",
+      maritalStatus: user.maritalStatus ?? "",
+      spouseName: user.spouseName ?? "",
+      childrenInfo: user.childrenInfo ?? "",
+      bloodGroup: user.bloodGroup ?? "",
+      emergencyContactName: user.emergencyContactName ?? "",
+      emergencyContactPhone: user.emergencyContactPhone ?? "",
+      emergencyContactRelation: user.emergencyContactRelation ?? "",
       status: user.status ?? "active",
     },
   });
@@ -268,6 +286,10 @@ function EditEmployeeDialog({ user, departments }: { user: any; departments: any
     if (!payload.departmentId) delete payload.departmentId;
     payload.birthday = payload.birthday ? payload.birthday : null;
     payload.workAnniversary = payload.workAnniversary ? payload.workAnniversary : null;
+    payload.marriageAnniversary = payload.marriageAnniversary ? payload.marriageAnniversary : null;
+    for (const k of ["phone", "maritalStatus", "spouseName", "childrenInfo", "bloodGroup", "emergencyContactName", "emergencyContactPhone", "emergencyContactRelation"] as const) {
+      payload[k] = payload[k] ? payload[k] : null;
+    }
     updateUser.mutate({ id: user.id, data: payload }, {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getListUsersQueryKey() });
@@ -285,7 +307,7 @@ function EditEmployeeDialog({ user, departments }: { user: any; departments: any
           <Pencil className="w-4 h-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Employee</DialogTitle>
         </DialogHeader>
@@ -329,6 +351,32 @@ function EditEmployeeDialog({ user, departments }: { user: any; departments: any
               </FormItem>
             )} />
             <div className="grid grid-cols-2 gap-4">
+              <FormField control={form.control} name="phone" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone</FormLabel>
+                  <FormControl>
+                    <Input type="tel" placeholder="+91 98765 43210" {...field} value={field.value ?? ""} data-testid={`edit-phone-${user.id}`} />
+                  </FormControl>
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="bloodGroup" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Blood Group</FormLabel>
+                  <Select value={field.value || "none"} onValueChange={v => field.onChange(v === "none" ? "" : v)}>
+                    <FormControl>
+                      <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">Not specified</SelectItem>
+                      {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(b => (
+                        <SelectItem key={b} value={b}>{b}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )} />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
               <FormField control={form.control} name="birthday" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Birthday</FormLabel>
@@ -345,6 +393,81 @@ function EditEmployeeDialog({ user, departments }: { user: any; departments: any
                   </FormControl>
                 </FormItem>
               )} />
+              <FormField control={form.control} name="marriageAnniversary" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Marriage Anniversary</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} value={field.value ?? ""} data-testid={`edit-marriage-${user.id}`} />
+                  </FormControl>
+                </FormItem>
+              )} />
+            </div>
+            <div className="rounded-md border border-border p-4 space-y-4">
+              <p className="text-sm font-medium text-foreground">Family details</p>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField control={form.control} name="maritalStatus" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Marital Status</FormLabel>
+                    <Select value={field.value || "none"} onValueChange={v => field.onChange(v === "none" ? "" : v)}>
+                      <FormControl>
+                        <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Not specified</SelectItem>
+                        <SelectItem value="single">Single</SelectItem>
+                        <SelectItem value="married">Married</SelectItem>
+                        <SelectItem value="divorced">Divorced</SelectItem>
+                        <SelectItem value="widowed">Widowed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="spouseName" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Spouse Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Spouse name" {...field} value={field.value ?? ""} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+              </div>
+              <FormField control={form.control} name="childrenInfo" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Children</FormLabel>
+                  <FormControl>
+                    <Textarea rows={2} placeholder="Names and ages of children (optional)" {...field} value={field.value ?? ""} />
+                  </FormControl>
+                </FormItem>
+              )} />
+            </div>
+            <div className="rounded-md border border-border p-4 space-y-4">
+              <p className="text-sm font-medium text-foreground">Emergency contact</p>
+              <div className="grid grid-cols-3 gap-4">
+                <FormField control={form.control} name="emergencyContactName" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Contact name" {...field} value={field.value ?? ""} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="emergencyContactPhone" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone</FormLabel>
+                    <FormControl>
+                      <Input type="tel" placeholder="+91…" {...field} value={field.value ?? ""} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="emergencyContactRelation" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Relation</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. Spouse" {...field} value={field.value ?? ""} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <FormField control={form.control} name="role" render={({ field }) => (

@@ -30,7 +30,7 @@ const router: IRouter = Router();
 // raw body so users can actually clear birthday / workAnniversary.
 function normalizeDateFields(parsed: any, raw: any): any {
   const out: any = { ...parsed };
-  for (const key of ["birthday", "workAnniversary"] as const) {
+  for (const key of ["birthday", "workAnniversary", "marriageAnniversary"] as const) {
     if (raw && key in raw) {
       const v = raw[key];
       out[key] = v && typeof v === "string" && v.length > 0 ? v : null;

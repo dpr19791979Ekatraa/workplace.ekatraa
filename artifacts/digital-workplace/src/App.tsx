@@ -4,6 +4,7 @@ import { publishableKeyFromHost } from "@clerk/react/internal";
 import { shadcn } from "@clerk/themes";
 import { Switch, Route, Redirect, useLocation, Router as WouterRouter } from "wouter";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { useGetCurrentUser } from "@workspace/api-client-react";
 import { queryClient } from "./lib/queryClient";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
@@ -142,17 +143,32 @@ function HomeRedirect() {
   );
 }
 
-function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+function ProtectedRoute({ component: Component, requiredRoles }: { component: React.ComponentType; requiredRoles?: string[] }) {
   return (
     <>
       <Show when="signed-in">
-        <Component />
+        {requiredRoles && requiredRoles.length > 0 ? (
+          <RoleGate roles={requiredRoles}>
+            <Component />
+          </RoleGate>
+        ) : (
+          <Component />
+        )}
       </Show>
       <Show when="signed-out">
         <Redirect to="/" />
       </Show>
     </>
   );
+}
+
+function RoleGate({ roles, children }: { roles: string[]; children: React.ReactNode }) {
+  const { data: me, isLoading } = useGetCurrentUser();
+  if (isLoading) return null;
+  if (!me?.role || !roles.includes(me.role)) {
+    return <Redirect to="/dashboard" />;
+  }
+  return <>{children}</>;
 }
 
 function ClerkProviderWithRoutes() {
@@ -195,7 +211,7 @@ function ClerkProviderWithRoutes() {
           <Route path="/documents" component={() => <ProtectedRoute component={DocumentsPage} />} />
           <Route path="/hr" component={() => <ProtectedRoute component={HRPage} />} />
           <Route path="/reimbursements" component={() => <ProtectedRoute component={ReimbursementsPage} />} />
-          <Route path="/performance" component={() => <ProtectedRoute component={PerformancePage} />} />
+          <Route path="/performance" component={() => <ProtectedRoute component={PerformancePage} requiredRoles={["super_admin", "admin", "hr_manager"]} />} />
           <Route path="/meetings" component={() => <ProtectedRoute component={MeetingsPage} />} />
           <Route path="/chat" component={() => <ProtectedRoute component={ChatPage} />} />
           <Route path="/analytics" component={() => <ProtectedRoute component={AnalyticsPage} />} />

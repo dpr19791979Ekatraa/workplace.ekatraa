@@ -19,6 +19,8 @@ const router: IRouter = Router();
 
 const HR_ROLES = ["super_admin", "admin", "hr_manager"];
 
+router.use("/performance", requireAuth, requireRole(HR_ROLES));
+
 async function userMap(ids: number[]): Promise<Map<number, { name: string; avatar: string | null }>> {
   const unique = Array.from(new Set(ids.filter((id) => Number.isFinite(id))));
   if (unique.length === 0) return new Map();

@@ -1532,6 +1532,23 @@ components:
         workAnniversary:
           type: ["string", "null"]
           format: date
+        marriageAnniversary:
+          type: ["string", "null"]
+          format: date
+        maritalStatus:
+          type: ["string", "null"]
+        spouseName:
+          type: ["string", "null"]
+        childrenInfo:
+          type: ["string", "null"]
+        emergencyContactName:
+          type: ["string", "null"]
+        emergencyContactPhone:
+          type: ["string", "null"]
+        emergencyContactRelation:
+          type: ["string", "null"]
+        bloodGroup:
+          type: ["string", "null"]
         status:
           type: string
           enum: [active, inactive, blocked]
@@ -1593,6 +1610,23 @@ components:
         workAnniversary:
           type: ["string", "null"]
           format: date
+        marriageAnniversary:
+          type: ["string", "null"]
+          format: date
+        maritalStatus:
+          type: ["string", "null"]
+        spouseName:
+          type: ["string", "null"]
+        childrenInfo:
+          type: ["string", "null"]
+        emergencyContactName:
+          type: ["string", "null"]
+        emergencyContactPhone:
+          type: ["string", "null"]
+        emergencyContactRelation:
+          type: ["string", "null"]
+        bloodGroup:
+          type: ["string", "null"]
 
     UserUpdate:
       type: object
@@ -1622,6 +1656,23 @@ components:
         workAnniversary:
           type: ["string", "null"]
           format: date
+        marriageAnniversary:
+          type: ["string", "null"]
+          format: date
+        maritalStatus:
+          type: ["string", "null"]
+        spouseName:
+          type: ["string", "null"]
+        childrenInfo:
+          type: ["string", "null"]
+        emergencyContactName:
+          type: ["string", "null"]
+        emergencyContactPhone:
+          type: ["string", "null"]
+        emergencyContactRelation:
+          type: ["string", "null"]
+        bloodGroup:
+          type: ["string", "null"]
         status:
           type: string
           enum: [active, inactive, blocked]
@@ -1809,6 +1860,13 @@ components:
           type: array
           items:
             type: string
+        completionNotes:
+          type: ["string", "null"]
+        completionFileUrl:
+          type: ["string", "null"]
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
         createdAt:
           type: string
           format: date-time
@@ -1867,6 +1925,10 @@ components:
           type: array
           items:
             type: string
+        completionNotes:
+          type: ["string", "null"]
+        completionFileUrl:
+          type: ["string", "null"]
 
     # ── Documents ─────────────────────────────────────────────────────────────
     Document:
@@ -2429,7 +2491,7 @@ components:
         userAvatar: { type: ["string", "null"] }
         category:
           type: string
-          enum: [travel, meals, accommodation, supplies, software, training, client, other]
+          enum: [travel, meals, accommodation, supplies, software, training, client, phone_bill, other]
         amount: { type: number }
         currency: { type: string }
         expenseDate: { type: string, format: date }
@@ -2446,16 +2508,18 @@ components:
 
     ReimbursementInput:
       type: object
-      required: [category, amount, expenseDate]
+      required: [category, amount, expenseDate, receiptUrl]
       properties:
         category:
           type: string
-          enum: [travel, meals, accommodation, supplies, software, training, client, other]
+          enum: [travel, meals, accommodation, supplies, software, training, client, phone_bill, other]
         amount: { type: number, minimum: 0.01 }
         currency: { type: string, default: "INR" }
         expenseDate: { type: string, format: date }
         description: { type: ["string", "null"] }
-        receiptUrl: { type: ["string", "null"] }
+        receiptUrl:
+          type: string
+          minLength: 1
 
     ReimbursementStatusUpdate:
       type: object

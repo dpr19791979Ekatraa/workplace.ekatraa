@@ -17,5 +17,6 @@ export const ReimbursementCategory = {
   software: 'software',
   training: 'training',
   client: 'client',
+  phone_bill: 'phone_bill',
   other: 'other',
 } as const;

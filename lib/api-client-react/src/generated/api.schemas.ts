@@ -59,6 +59,22 @@ export interface User {
   birthday?: string | null;
   /** @nullable */
   workAnniversary?: string | null;
+  /** @nullable */
+  marriageAnniversary?: string | null;
+  /** @nullable */
+  maritalStatus?: string | null;
+  /** @nullable */
+  spouseName?: string | null;
+  /** @nullable */
+  childrenInfo?: string | null;
+  /** @nullable */
+  emergencyContactName?: string | null;
+  /** @nullable */
+  emergencyContactPhone?: string | null;
+  /** @nullable */
+  emergencyContactRelation?: string | null;
+  /** @nullable */
+  bloodGroup?: string | null;
   status: UserStatus;
   createdAt: string;
   /** @nullable */
@@ -111,6 +127,22 @@ export interface UserInput {
   birthday?: string | null;
   /** @nullable */
   workAnniversary?: string | null;
+  /** @nullable */
+  marriageAnniversary?: string | null;
+  /** @nullable */
+  maritalStatus?: string | null;
+  /** @nullable */
+  spouseName?: string | null;
+  /** @nullable */
+  childrenInfo?: string | null;
+  /** @nullable */
+  emergencyContactName?: string | null;
+  /** @nullable */
+  emergencyContactPhone?: string | null;
+  /** @nullable */
+  emergencyContactRelation?: string | null;
+  /** @nullable */
+  bloodGroup?: string | null;
 }
 
 export type UserUpdateRole = typeof UserUpdateRole[keyof typeof UserUpdateRole];
@@ -154,6 +186,22 @@ export interface UserUpdate {
   birthday?: string | null;
   /** @nullable */
   workAnniversary?: string | null;
+  /** @nullable */
+  marriageAnniversary?: string | null;
+  /** @nullable */
+  maritalStatus?: string | null;
+  /** @nullable */
+  spouseName?: string | null;
+  /** @nullable */
+  childrenInfo?: string | null;
+  /** @nullable */
+  emergencyContactName?: string | null;
+  /** @nullable */
+  emergencyContactPhone?: string | null;
+  /** @nullable */
+  emergencyContactRelation?: string | null;
+  /** @nullable */
+  bloodGroup?: string | null;
   status?: UserUpdateStatus;
 }
 
@@ -359,6 +407,12 @@ export interface Task {
   /** @nullable */
   loggedHours?: number | null;
   tags?: string[];
+  /** @nullable */
+  completionNotes?: string | null;
+  /** @nullable */
+  completionFileUrl?: string | null;
+  /** @nullable */
+  completedAt?: string | null;
   createdAt: string;
 }
 
@@ -436,6 +490,10 @@ export interface TaskUpdate {
   /** @nullable */
   loggedHours?: number | null;
   tags?: string[];
+  /** @nullable */
+  completionNotes?: string | null;
+  /** @nullable */
+  completionFileUrl?: string | null;
 }
 
 export type DocumentType = typeof DocumentType[keyof typeof DocumentType];
@@ -907,6 +965,7 @@ export const ReimbursementCategory = {
   software: 'software',
   training: 'training',
   client: 'client',
+  phone_bill: 'phone_bill',
   other: 'other',
 } as const;
 
@@ -958,6 +1017,7 @@ export const ReimbursementInputCategory = {
   software: 'software',
   training: 'training',
   client: 'client',
+  phone_bill: 'phone_bill',
   other: 'other',
 } as const;
 
@@ -969,8 +1029,8 @@ export interface ReimbursementInput {
   expenseDate: string;
   /** @nullable */
   description?: string | null;
-  /** @nullable */
-  receiptUrl?: string | null;
+  /** @minLength 1 */
+  receiptUrl: string;
 }
 
 export type ReimbursementStatusUpdateStatus = typeof ReimbursementStatusUpdateStatus[keyof typeof ReimbursementStatusUpdateStatus];

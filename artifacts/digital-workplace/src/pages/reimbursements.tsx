@@ -36,6 +36,7 @@ const CATEGORIES = [
   { value: "software", label: "Software" },
   { value: "training", label: "Training" },
   { value: "client", label: "Client expense" },
+  { value: "phone_bill", label: "Phone bill" },
   { value: "other", label: "Other" },
 ];
 
@@ -91,22 +92,23 @@ function SubmitDialog() {
   };
 
   const onSubmit = async (data: CreateForm) => {
+    if (!file) {
+      toast({ title: "Receipt is required", description: "Please attach a receipt before submitting.", variant: "destructive" });
+      return;
+    }
     try {
-      let receiptUrl: string | null = null;
-      if (file) {
-        setUploading(true);
-        const presign = await requestUploadUrl.mutateAsync({
-          data: { name: file.name, size: file.size, contentType: file.type || "application/octet-stream" } as any,
-        });
-        const { uploadURL, objectPath } = presign as any;
-        const putRes = await fetch(uploadURL, {
-          method: "PUT",
-          headers: { "Content-Type": file.type || "application/octet-stream" },
-          body: file,
-        });
-        if (!putRes.ok) throw new Error("Receipt upload failed");
-        receiptUrl = objectPath;
-      }
+      setUploading(true);
+      const presign = await requestUploadUrl.mutateAsync({
+        data: { name: file.name, size: file.size, contentType: file.type || "application/octet-stream" } as any,
+      });
+      const { uploadURL, objectPath } = presign as any;
+      const putRes = await fetch(uploadURL, {
+        method: "PUT",
+        headers: { "Content-Type": file.type || "application/octet-stream" },
+        body: file,
+      });
+      if (!putRes.ok) throw new Error("Receipt upload failed");
+      const receiptUrl: string = objectPath;
 
       await create.mutateAsync({
         data: {
@@ -208,17 +210,22 @@ function SubmitDialog() {
             )} />
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Receipt (optional)</label>
+              <label className="text-sm font-medium">
+                Receipt <span className="text-destructive">*</span>
+              </label>
               <Input
                 type="file"
                 accept="image/*,application/pdf"
+                required
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
                 data-testid="input-receipt"
               />
-              {file && (
+              {file ? (
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Paperclip className="w-3 h-3" /> {file.name} ({(file.size / 1024).toFixed(0)} KB)
                 </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">A receipt (image or PDF) is required.</p>
               )}
             </div>
 

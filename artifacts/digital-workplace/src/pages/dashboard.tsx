@@ -63,13 +63,15 @@ export default function DashboardPage() {
     <Layout title="Dashboard">
       <div className="p-6 space-y-6 max-w-7xl mx-auto">
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className={`grid grid-cols-2 lg:grid-cols-3 ${isHR ? "xl:grid-cols-6" : "xl:grid-cols-5"} gap-4`}>
           <StatCard title="Employees" value={analytics?.totalEmployees} icon={Users} color="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400" testId="stat-employees" />
           <StatCard title="Active Projects" value={analytics?.activeProjects} icon={FolderKanban} color="bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400" testId="stat-projects" />
           <StatCard title={isManager ? "Pending Tasks" : "My Pending Tasks"} value={analytics?.pendingTasks} icon={CheckSquare} color="bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400" testId="stat-tasks" />
           <StatCard title="Present Today" value={analytics?.presentToday} icon={Clock} color="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400" testId="stat-present" />
           <StatCard title="Documents" value={analytics?.documentsUploaded} icon={FileText} color="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" testId="stat-documents" />
-          <StatCard title={isHR ? "Pending Leaves" : "My Pending Leaves"} value={analytics?.pendingLeaves} icon={CalendarOff} color="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400" testId="stat-leaves" />
+          {isHR && (
+            <StatCard title="Pending Leaves" value={analytics?.pendingLeaves} icon={CalendarOff} color="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400" testId="stat-leaves" />
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -21,11 +21,14 @@ const navItems = [
   { href: "/documents", icon: FileText, label: "Documents" },
   { href: "/hr", icon: Users, label: "HR" },
   { href: "/reimbursements", icon: Receipt, label: "Reimbursements" },
-  { href: "/performance", icon: Award, label: "Performance" },
   { href: "/meetings", icon: Video, label: "Meetings" },
   { href: "/chat", icon: MessageCircle, label: "Chat" },
   { href: "/analytics", icon: BarChart2, label: "Analytics" },
   { href: "/policy", icon: BookOpen, label: "Policy" },
+];
+
+const hrNavItems = [
+  { href: "/performance", icon: Award, label: "Performance" },
 ];
 
 const adminNavItems = [
@@ -47,6 +50,7 @@ export default function Layout({ children, title }: LayoutProps) {
   const { data: currentUser } = useGetCurrentUser();
 
   const isAdmin = currentUser?.role && ["super_admin", "admin"].includes(currentUser.role);
+  const isHR = currentUser?.role && ["super_admin", "admin", "hr_manager"].includes(currentUser.role);
   const userInitials = currentUser
     ? `${currentUser.firstName?.[0] ?? ""}${currentUser.lastName?.[0] ?? ""}`.toUpperCase()
     : "U";
@@ -116,6 +120,10 @@ export default function Layout({ children, title }: LayoutProps) {
         {/* Nav */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto text-[#000000]">
           {navItems.map((item) => (
+            <NavLink key={item.href} item={item} />
+          ))}
+
+          {isHR && hrNavItems.map((item) => (
             <NavLink key={item.href} item={item} />
           ))}
 

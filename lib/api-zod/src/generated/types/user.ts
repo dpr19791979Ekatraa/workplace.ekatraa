@@ -33,6 +33,22 @@ export interface User {
   birthday?: Date | null;
   /** @nullable */
   workAnniversary?: Date | null;
+  /** @nullable */
+  marriageAnniversary?: Date | null;
+  /** @nullable */
+  maritalStatus?: string | null;
+  /** @nullable */
+  spouseName?: string | null;
+  /** @nullable */
+  childrenInfo?: string | null;
+  /** @nullable */
+  emergencyContactName?: string | null;
+  /** @nullable */
+  emergencyContactPhone?: string | null;
+  /** @nullable */
+  emergencyContactRelation?: string | null;
+  /** @nullable */
+  bloodGroup?: string | null;
   status: UserStatus;
   createdAt: Date;
   /** @nullable */
